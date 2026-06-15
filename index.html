@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Paradis du Fruit — Master Framework v5</title>
+  <title>Paradis du Fruit — Master Framework v6</title>
   
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -11,11 +11,11 @@
 
   <style>
     :root {
-      --bg-main: #fcfbfa;
+      --bg-main: #f8f7f4;
       --panel-bg: #ffffff;
       --text-dark: #0f172a;
       --text-muted: #64748b;
-      --primary-green: #062410;
+      --primary-green: #073314;
       --accent-gold: #eab308;
     }
 
@@ -23,12 +23,29 @@
       margin: 0;
       padding: 0;
       background-color: var(--bg-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
       user-select: none;
       -webkit-tap-highlight-color: transparent; 
     }
 
+    /* Structures de cartes unifiées */
+    .card-ui {
+      background: var(--panel-bg);
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 20px rgba(15,23,42,0.02);
+      overflow: hidden;
+    }
+
+    .card-hover {
+      transition: all 0.2s ease;
+    }
+    .card-hover:active {
+      background-color: #fcfbfa;
+    }
+
+    /* Grille élastique adaptative */
     .responsive-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -36,18 +53,27 @@
       width: 100%;
     }
 
-    @media (min-width: 640px) {
+    @media (min-width: 680px) {
       .responsive-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 20px;
       }
     }
 
     .touch-target {
-      min-height: 44px;
+      min-height: 46px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .btn-interactive {
+      transition: transform 0.1s ease, filter 0.2s ease;
+    }
+    .btn-interactive:active {
+      transform: scale(0.97);
+      filter: brightness(0.95);
     }
 
     .tab-container {
@@ -60,10 +86,10 @@
     }
 
     .animate-fade {
-      animation: tabFade 0.2s ease-out;
+      animation: tabFade 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
     @keyframes tabFade {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
   </style>

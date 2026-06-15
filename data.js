@@ -169,7 +169,6 @@ window.SECTIONS = {
   }
 };
 
-// Base fixe de questions théoriques règlementaires européennes
 window.OFFICIAL_ALLERGENS = [
   { id: "gluten", name: "Céréales contenant du gluten", desc: "Blé, seigle, orge, avoine, épeautre (Pitas, Focaccia, Blinis, Choux, Panures)", color: { bg: "#faf6f0", text: "#6b4423", border: "#e8dcad" } },
   { id: "crustaces", name: "Crustacés", desc: "Crevettes, homard, crabe", color: { bg: "#ffe4e6", text: "#9f1239", border: "#fecdd3" } },

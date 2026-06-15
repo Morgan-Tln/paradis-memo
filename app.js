@@ -20,7 +20,6 @@ function detectAllergens(ingredients, name) {
   return allergens;
 }
 
-// Nuancier de jetons d'ingrédients cohérents
 function getIngredientStyle(name) {
   const lower = name.toLowerCase().trim();
   if (lower.includes("choix") || lower.includes("chois")) return { bg: "#fffbeb", text: "#b45309", border: "#fde047" };
@@ -53,55 +52,83 @@ function MainApp() {
   const [expandedCat, setExpandedCat] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [mode, setMode] = useState("learn");
-  
-  // États robustes découplés pour le moteur de Quiz
-  const [questionsPool, setQuestionsPool] = useState([]);
-  const [quizIdx, setQuizIdx] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [score, setScore] = useState({ ok: 0, nok: 0 });
-  const [quizFinished, setQuizFinished] = useState(false);
   const [flashcardMode, setFlashcardMode] = useState(false);
+
+  // States du Quiz initialisés de manière paresseuse (Lazy Initialization) via localStorage
+  const [questionsPool, setQuestionsPool] = useState(() => {
+    const savedPool = localStorage.getItem("paradis_quiz_pool");
+    return savedPool ? JSON.parse(savedPool) : [];
+  });
+
+  const [quizIdx, setQuizIdx] = useState(() => {
+    const savedIdx = localStorage.getItem("paradis_quiz_idx");
+    return savedIdx ? parseInt(savedIdx, 10) : 0;
+  });
+
+  const [score, setScore] = useState(() => {
+    const savedScore = localStorage.getItem("paradis_quiz_score");
+    return savedScore ? JSON.parse(savedScore) : { ok: 0, nok: 0 };
+  });
+
+  const [quizFinished, setQuizFinished] = useState(() => {
+    const savedFinished = localStorage.getItem("paradis_quiz_finished");
+    return savedFinished ? JSON.parse(savedFinished) : false;
+  });
+
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const section = window.SECTIONS[activeTab];
 
-  // Compilateur de Quiz Dynamique de Haute Complexité
+  // Effets de synchronisation avec le LocalStorage dès qu'une variable d'état change
+  useEffect(() => {
+    localStorage.setItem("paradis_quiz_pool", JSON.stringify(questionsPool));
+  }, [questionsPool]);
+
+  useEffect(() => {
+    localStorage.setItem("paradis_quiz_idx", quizIdx.toString());
+  }, [quizIdx]);
+
+  useEffect(() => {
+    localStorage.setItem("paradis_quiz_score", JSON.stringify(score));
+  }, [score]);
+
+  useEffect(() => {
+    localStorage.setItem("paradis_quiz_finished", JSON.stringify(quizFinished));
+  }, [quizFinished]);
+
+  // Générateur dynamique d'Examen avec nettoyage préalable
   const buildExamSimulator = () => {
     let pool = [];
 
-    // Injection automatique depuis TOUTES les sections de data.js
     Object.entries(window.SECTIONS).forEach(([secKey, sec]) => {
       Object.entries(sec.categories).forEach(([catKey, cat]) => {
         cat.items.forEach((item) => {
-          // Type de question 1 : La composition brute
           pool.push({
-            q: `Quels sont les ingrédients précis composants la recette : "${item.name}" ?`,
-            a: `Composition exacte : ${item.ingredients.join(", ")}.`,
-            cat: `${sec.label} — ${cat.label}`
+            q: `Quelle est la composition exacte et complète du produit suivant : "${item.name}" ?`,
+            a: `Ingrédients requis : ${item.ingredients.join(", ")}.`,
+            cat: `${sec.label} — Ingrédients`
           });
 
-          // Type de question 2 : Les alertes mémos critiques
           if (item.memo) {
             pool.push({
-              q: `Quel est le mémo opérationnel ou le point de vigilance pour le produit : "${item.name}" ?`,
+              q: `Quelle est la règle d'or opérationnelle ou le point de vigilance à retenir pour : "${item.name}" ?`,
               a: item.memo,
-              cat: `${sec.label} — Mémo`
+              cat: `${sec.label} — Point Critique`
             });
           }
 
-          // Type de question 3 : Diagnostic Allergènes d'examen
           const detected = detectAllergens(item.ingredients, item.name);
           if (detected.length > 0) {
             pool.push({
-              q: `Quels sont les allergènes majeurs réglementaires présents dans : "${item.name}" ?`,
-              a: `Allergènes détectés à déclarer : ${detected.join(", ")}.`,
-              cat: `Sécurité Alimentaire`
+              q: `En salle ou au comptoir, quels sont les allergènes majeurs que vous devez obligatoirement déclarer pour la recette : "${item.name}" ?`,
+              a: `Allergènes officiels présents : ${detected.join(", ")}.`,
+              cat: `🛡️ Sécurité & Allergènes`
             });
           }
         });
       });
     });
 
-    // Algorithme de mélange de Fisher-Yates pour briser la linéarité
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -114,9 +141,9 @@ function MainApp() {
     setScore({ ok: 0, nok: 0 });
   };
 
-  // Déclenchement propre sans boucle infinie
+  // Déclenchement automatique au premier clic sur l'onglet si aucun pool n'existe
   useEffect(() => {
-    if (mode === "quiz") {
+    if (mode === "quiz" && questionsPool.length === 0) {
       buildExamSimulator();
     }
   }, [mode]);
@@ -135,29 +162,39 @@ function MainApp() {
     }
   };
 
+  // Réinitialisation explicite du LocalStorage pour forcer un nouveau mélange
+  const resetQuizStorage = () => {
+    localStorage.removeItem("paradis_quiz_pool");
+    localStorage.removeItem("paradis_quiz_idx");
+    localStorage.removeItem("paradis_quiz_score");
+    localStorage.removeItem("paradis_quiz_finished");
+    buildExamSimulator();
+  };
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       
       {/* Top Banner Dashboard */}
-      <div style={{ background: "linear-gradient(135deg, #021106 0%, var(--primary-green) 100%)", padding: "30px 16px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
-        <div style={{ fontSize: "clamp(20px, 5vw, 34px)", fontWeight: 955, color: "var(--accent-gold)", letterSpacing: 1.5, textTransform: "uppercase" }}>🌴 MASTERMIND PARADIS</div>
-        <div style={{ color: "#a2dbb0", fontSize: 12, marginTop: 6, marginBottom: 20, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={{ background: "linear-gradient(135deg, #010f05 0%, var(--primary-green) 100%)", padding: "35px 16px", textAlign: "center", boxShadow: "0 10px 30px rgba(6,36,16,0.15)" }}>
+        <div style={{ fontSize: "clamp(22px, 5vw, 36px)", fontWeight: 955, color: "var(--accent-gold)", letterSpacing: 2, textTransform: "uppercase" }}>🌴 MASTERMIND PARADIS</div>
+        <div style={{ color: "#bbf7d0", fontSize: 12, marginTop: 6, marginBottom: 24, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2 }}>
         </div>
         
-        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
           {[
-            { id: "learn", label: "💡 La Carte" },
+            { id: "learn", label: "💡 Carte" },
             { id: "allergens_tab", label: "🛡️ Allergènes" },
             { id: "quiz", label: "🎯 Quizz" }
           ].map(m => (
             <button key={m.id} 
               onClick={() => setMode(m.id)}
-              className="touch-target"
+              className="touch-target btn-interactive"
               style={{ 
-                padding: "12px 20px", borderRadius: "12px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13,
-                transition: "all 0.2s",
-                background: mode === m.id ? "var(--bg-main)" : "rgba(255,255,255,0.06)", 
-                color: mode === m.id ? "var(--primary-green)" : "#ffffff"
+                padding: "10px 20px", borderRadius: "12px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13,
+                background: mode === m.id ? "var(--accent-gold)" : "rgba(255,255,255,0.08)", 
+                color: mode === m.id ? "var(--primary-green)" : "#ffffff",
+                boxShadow: mode === m.id ? "0 4px 15px rgba(234,179,8,0.3)" : "none",
+                transition: "all 0.2s"
               }}>
               {m.label}
             </button>
@@ -165,139 +202,149 @@ function MainApp() {
         </div>
       </div>
 
-      {/* Rendu du Mode Quiz Entièrement Réparé */}
+      {/* Rendu du Mode Quiz */}
       {mode === "quiz" && (
-        <div style={{ maxWidth: 650, width: "100%", margin: "20px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
+        <div style={{ maxWidth: 650, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
           {quizFinished ? (
-            <div style={{ background: "var(--panel-bg)", borderRadius: 24, padding: "40px 24px", textAlign: "center", border: "1px solid #cbd5e1", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
-              <div style={{ fontSize: 64 }}>🏆</div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 16, color: "var(--text-dark)" }}>Session Terminée</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "var(--primary-green)", marginTop: 8 }}>
-                Score : {score.ok} / {questionsPool.length} Réussites
+            <div className="card-ui" style={{ textAlign: "center", padding: "40px 24px" }}>
+              <div style={{ fontSize: 72 }}>🏆</div>
+              <div style={{ fontSize: 26, fontWeight: 955, marginTop: 16, color: "var(--text-dark)" }}>Évaluation Terminée</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--primary-green)", marginTop: 10, background: "#f0fdf4", display: "inline-block", padding: "8px 20px", borderRadius: 99 }}>
+                Score Obtenu : {score.ok} / {questionsPool.length} ({questionsPool.length > 0 ? Math.round((score.ok / questionsPool.length) * 100) : 0}%)
               </div>
-              <button onClick={buildExamSimulator} className="touch-target" style={{ width: "100%", marginTop: 24, padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 800, fontSize: 15, cursor: "pointer" }}>
-                🔄 Regénérer une Session d'Examen
+              <button onClick={resetQuizStorage} className="touch-target btn-interactive" style={{ width: "100%", marginTop: 30, padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 800, fontSize: 15, cursor: "pointer", boxShadow: "0 4px 15px rgba(6,36,16,0.2)" }}>
+                🔄 Recommencer un Nouvel Examen
               </button>
             </div>
           ) : questionsPool.length > 0 ? (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, padding: "0 4px" }}>
-                <span style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 800 }}>QUESTION : {quizIdx + 1} / {questionsPool.length}</span>
-                <span style={{ fontSize: 12, fontWeight: 800, background: "#ffffff", padding: "6px 14px", borderRadius: 99, border: "1px solid #e2e8f0" }}>✅ {score.ok} &nbsp;&bull;&nbsp; ❌ {score.nok}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 4px" }}>
+                <span style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5 }}>Progression : {quizIdx + 1} / {questionsPool.length}</span>
+                <span style={{ fontSize: 12, fontWeight: 800, background: "#ffffff", padding: "6px 14px", borderRadius: 99, border: "1px solid #cbd5e1" }}>✅ {score.ok} &nbsp;&bull;&nbsp; ❌ {score.nok}</span>
               </div>
               
-              <div style={{ background: "var(--panel-bg)", borderRadius: 24, padding: "24px", border: "1px solid #cbd5e1", boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
-                <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 900, marginBottom: 12, display: "inline-block", background: "#f1f5f9", padding: "4px 10px", borderRadius: 6 }}>
-                  Secteur : {questionsPool[quizIdx].cat}
+              <div className="card-ui" style={{ padding: "30px 24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                  <div style={{ fontSize: 10, color: "var(--primary-green)", textTransform: "uppercase", fontWeight: 900, background: "#e6f4ea", padding: "6px 12px", borderRadius: 8, border: "1px solid #bbf7d0" }}>
+                    {questionsPool[quizIdx].cat}
+                  </div>
+                  <button onClick={resetQuizStorage} style={{ background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
+                    Réinitialiser 🔄
+                  </button>
                 </div>
                 
-                <div style={{ fontSize: "clamp(16px, 4.5vw, 20px)", fontWeight: 900, lineHeight: 1.4, color: "var(--text-dark)", marginBottom: 24 }}>
+                <div style={{ fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 950, lineHeight: 1.4, color: "var(--text-dark)", marginBottom: 30 }}>
                   {questionsPool[quizIdx].q}
                 </div>
 
                 {!showAnswer ? (
-                  <button onClick={() => setShowAnswer(true)} className="touch-target" style={{ width: "100%", padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 800, fontSize: 15, cursor: "pointer" }}>
-                    👁️ Interroger la Fiche Recette
+                  <button onClick={() => setShowAnswer(true)} className="touch-target btn-interactive" style={{ width: "100%", padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 800, fontSize: 15, cursor: "pointer", boxShadow: "0 4px 15px rgba(6,36,16,0.15)" }}>
+                    👁️ Vérifier la Fiche Technique
                   </button>
                 ) : (
                   <div className="animate-fade">
-                    <div style={{ background: "#f0fdf4", borderRadius: 16, padding: 16, marginBottom: 20, borderLeft: "5px solid #16a34a" }}>
-                      <div style={{ fontWeight: 700, color: "#14532d", fontSize: 15, lineHeight: 1.5 }}>
+                    <div style={{ background: "#f0fdf4", borderRadius: 16, padding: 20, marginBottom: 25, borderLeft: "5px solid #16a34a" }}>
+                      <div style={{ fontWeight: 800, color: "#14532d", fontSize: 15, lineHeight: 1.6 }}>
                         {questionsPool[quizIdx].a}
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 12 }}>
-                      <button onClick={() => handleNextQuestion(false)} className="touch-target" style={{ flex: 1, padding: "14px", background: "#fef2f2", color: "#991b1b", border: "none", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>❌ Échec</button>
-                      <button onClick={() => handleNextQuestion(true)} className="touch-target" style={{ flex: 1, padding: "14px", background: "#f0fdf4", color: "#166534", border: "none", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>✅ Validé</button>
+                      <button onClick={() => handleNextQuestion(false)} className="touch-target btn-interactive" style={{ flex: 1, padding: "14px", background: "#fef2f2", color: "#991b1b", border: "1px solid #fee2e2", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>❌ À Revoir</button>
+                      <button onClick={() => handleNextQuestion(true)} className="touch-target btn-interactive" style={{ flex: 1, padding: "14px", background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>✅ Maîtrisé</button>
                     </div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div style={{ textAlign: "center", padding: 40, color: "var(--text-muted)" }}>Compilation du bassin de questions...</div>
+            <div style={{ textAlign: "center", padding: 40, color: "var(--text-muted)", fontWeight: 700 }}>
+              <button onClick={buildExamSimulator} className="touch-target btn-interactive" style={{ padding: "12px 24px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 12, fontWeight: 800 }}>
+                🚀 Générer le pool de questions
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {/* Rendu Mode Allergènes Règlementaires */}
+      {/* Mode Référentiel Allergènes */}
       {mode === "allergens_tab" && (
-        <div style={{ maxWidth: 800, width: "100%", margin: "20px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
-          <div style={{ marginBottom: 20, background: "#fff", padding: 20, borderRadius: 16, border: "1px solid #cbd5e1" }}>
-            <h3 style={{ margin: "0 0 8px 0", color: "var(--primary-green)", fontWeight: 900 }}>🛡️ Les 14 Allergènes Majeurs Réglementaires</h3>
-            <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-              Base légale européenne de contrôle des flux de service. Cet onglet sert de référentiel théorique direct.
+        <div style={{ maxWidth: 800, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
+          <div className="card-ui" style={{ marginBottom: 20, padding: 20, borderLeft: "5px solid var(--primary-green)" }}>
+            <h3 style={{ margin: "0 0 6px 0", color: "var(--primary-green)", fontWeight: 955, fontSize: 18 }}>🛡️ Les 14 Allergènes Majeurs Réglementaires</h3>
+            <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5, fontWeight: 500 }}>
+              Base légale de contrôle sanitaire. L'application extrait dynamiquement ces allergènes depuis la liste des ingrédients de vos fiches techniques.
             </p>
           </div>
           <div className="responsive-grid">
             {window.OFFICIAL_ALLERGENS.map((alg) => (
-              <div key={alg.id} style={{ background: "#fff", border: `2px solid ${alg.color.border}`, borderRadius: 16, padding: 16 }}>
+              <div key={alg.id} className="card-ui card-hover" style={{ padding: 18, borderTop: `4px solid ${alg.color.border}` }}>
                 <span style={{ background: alg.color.bg, color: alg.color.text, border: `1px solid ${alg.color.border}`, padding: "4px 10px", borderRadius: 8, fontSize: 12, fontWeight: 900, display: "inline-block" }}>
                   {alg.name}
                 </span>
-                <p style={{ margin: "10px 0 0 0", fontSize: 13, color: "var(--text-dark)", fontWeight: 600, lineHeight: 1.4 }}>{alg.desc}</p>
+                <p style={{ margin: "12px 0 0 0", fontSize: 13, color: "var(--text-dark)", fontWeight: 600, lineHeight: 1.5 }}>{alg.desc}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Rendu Mode Apprentissage Carte */}
+      {/* Mode Consultation de la Carte */}
       {mode === "learn" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%" }}>
-          <div className="tab-container" style={{ display: "flex", gap: 8, padding: "12px 16px", background: "var(--panel-bg)", borderBottom: "1px solid #e2e8f0", overflowX: "auto", alignItems: "center", justifyContent: "space-between" }}>
+          <div className="tab-container" style={{ display: "flex", gap: 8, padding: "14px 16px", background: "var(--panel-bg)", borderBottom: "1px solid #cbd5e1", overflowX: "auto", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", gap: 8 }}>
               {Object.entries(window.SECTIONS).map(([key, s]) => {
                 const totalItems = Object.values(s.categories).reduce((acc, cat) => acc + cat.items.length, 0);
                 return (
                   <button key={key} onClick={() => { setActiveTab(key); setExpandedCat(null); setExpandedItem(null); }}
-                    className="touch-target"
+                    className="touch-target btn-interactive"
                     style={{ 
-                      padding: "10px 16px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13, whiteSpace: "nowrap",
+                      padding: "10px 18px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13, whiteSpace: "nowrap",
                       background: activeTab === key ? s.color : "#f1f5f9", 
-                      color: activeTab === key ? "#fff" : "var(--text-muted)"
+                      color: activeTab === key ? "#fff" : "var(--text-muted)",
+                      boxShadow: activeTab === key ? `0 4px 12px ${s.color}40` : "none"
                     }}>
                     {s.label} ({totalItems})
                   </button>
                 );
               })}
             </div>
-            <button onClick={() => setFlashcardMode(!flashcardMode)} className="touch-target" style={{ padding: "10px 16px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 12, whiteSpace: "nowrap", background: flashcardMode ? "var(--primary-green)" : "#e2e8f0", color: flashcardMode ? "#fff" : "var(--text-dark)" }}>
-              {flashcardMode ? "👁️ Afficher" : "🙈 Masquer"}
+            <button onClick={() => setFlashcardMode(!flashcardMode)} className="touch-target btn-interactive" style={{ padding: "10px 16px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 12, whiteSpace: "nowrap", background: flashcardMode ? "var(--primary-green)" : "#e2e8f0", color: flashcardMode ? "#fff" : "var(--text-dark)" }}>
+              {flashcardMode ? "👁️ Tout Afficher" : "🙈 Mode Cache"}
             </button>
           </div>
 
-          <div style={{ padding: "16px", width: "100%", boxSizing: "border-box" }}>
+          <div style={{ padding: "20px 16px", width: "100%", boxSizing: "border-box", maxWidth: 1200, margin: "0 auto" }}>
             {Object.entries(section.categories).map(([catKey, cat]) => (
-              <div key={catKey} style={{ marginBottom: 16, borderRadius: 16, overflow: "hidden", background: "var(--panel-bg)", border: "1px solid #e2e8f0" }}>
-                <button onClick={() => setExpandedCat(expandedCat === catKey ? null : catKey)} className="touch-target" style={{ width: "100%", padding: "16px 20px", background: "var(--panel-bg)", border: "none", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
+              <div key={catKey} style={{ marginBottom: 20, borderRadius: 16, overflow: "hidden", background: "var(--panel-bg)", border: "1px solid #cbd5e1" }}>
+                <button onClick={() => setExpandedCat(expandedCat === catKey ? null : catKey)} className="touch-target card-hover" style={{ width: "100%", padding: "18px 20px", background: "var(--panel-bg)", border: "none", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
                   <span style={{ fontWeight: 955, fontSize: 16, color: "var(--text-dark)" }}>{cat.emoji} &nbsp;&nbsp; {cat.label} ({cat.items.length})</span>
                   <span style={{ color: "var(--text-muted)", fontSize: 18, fontWeight: "bold" }}>{expandedCat === catKey ? "−" : "＋"}</span>
                 </button>
 
                 {expandedCat === catKey && (
-                  <div style={{ padding: "12px", background: "#faf9f4", borderTop: "1px solid #f1f5f9" }}>
+                  <div style={{ padding: "16px", background: "#faf9f5", borderTop: "1px solid #cbd5e1" }}>
                     <div className="responsive-grid">
                       {cat.items.map((item, i) => {
                         const isRevealed = expandedItem === `${catKey}-${i}`;
                         const allergensDetected = detectAllergens(item.ingredients, item.name);
                         
                         return (
-                          <div key={i} style={{ background: "var(--panel-bg)", border: "1px solid #cbd5e1", borderRadius: 14, overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                            <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", fontWeight: 900, fontSize: 15, color: "var(--text-dark)", background: "#ffffff" }}>
+                          <div key={i} className="card-ui" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", border: "1px solid #cbd5e1" }}>
+                            <div style={{ padding: "16px", borderBottom: "1px solid #f1f5f9", fontWeight: 955, fontSize: 15, color: "var(--text-dark)", background: "#ffffff" }}>
                               {item.name}
                             </div>
                             
-                            <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
                               {(!flashcardMode || isRevealed) ? (
-                                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                                   <div>
-                                    <div style={{ fontSize: 9, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>Composition</div>
+                                    <div style={{ fontSize: 9, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Fiche Ingrédients</div>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                                       {item.ingredients.map((ing, j) => {
                                         const colors = getIngredientStyle(ing);
                                         return (
-                                          <span key={j} style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}`, borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 800 }}>
+                                          <span key={j} style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}`, borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 800 }}>
                                             {ing}
                                           </span>
                                         );
@@ -306,13 +353,13 @@ function MainApp() {
                                   </div>
 
                                   {allergensDetected.length > 0 && (
-                                    <div style={{ borderTop: "1px dashed #e2e8f0", paddingTop: 10 }}>
-                                      <div style={{ fontSize: 9, fontWeight: 900, color: "#be123c", textTransform: "uppercase", marginBottom: 6 }}>🛡️ Allergènes critiques</div>
+                                    <div style={{ borderTop: "1px dashed #cbd5e1", paddingTop: 12 }}>
+                                      <div style={{ fontSize: 9, fontWeight: 900, color: "#be123c", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>🛡️ Allergènes Présents</div>
                                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                                         {allergensDetected.map((algName, k) => {
                                           const matched = window.OFFICIAL_ALLERGENS.find(a => a.name === algName);
                                           return (
-                                            <span key={k} style={{ background: matched?.color.bg || "#fff1f2", color: matched?.color.text || "#be123c", border: `1px solid ${matched?.color.border || "#fecdd3"}`, borderRadius: 6, padding: "2px 8px", fontSize: 10, fontWeight: 900 }}>
+                                            <span key={k} style={{ background: matched?.color.bg || "#fff1f2", color: matched?.color.text || "#be123c", border: `1px solid ${matched?.color.border || "#fecdd3"}`, borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 900 }}>
                                               {algName}
                                             </span>
                                           );
@@ -322,14 +369,14 @@ function MainApp() {
                                   )}
 
                                   {item.memo && (
-                                    <div style={{ background: "#fffdf5", border: "1px solid #fef3c7", borderRadius: 10, padding: "10px 12px", fontSize: 11, color: "#78350f", lineHeight: 1.5 }}>
+                                    <div style={{ background: "#fffdf5", border: "1px solid #fde047", borderRadius: 10, padding: "12px", fontSize: 11, color: "#78350f", lineHeight: 1.5, fontWeight: 600 }}>
                                       <strong>⚡ MÉMO :</strong> {item.memo}
                                     </div>
                                   )}
                                 </div>
                               ) : (
-                                <button onClick={() => setExpandedItem(`${catKey}-${i}`)} className="touch-target" style={{ width: "100%", padding: "12px", background: "#fffbeb", border: "1px dashed #d97706", borderRadius: 10, color: "#b45309", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
-                                  ❓ Révéler la composition & allergènes
+                                <button onClick={() => setExpandedItem(`${catKey}-${i}`)} className="touch-target btn-interactive" style={{ width: "100%", padding: "14px", background: "#fffbeb", border: "1px dashed #d97706", borderRadius: 10, color: "#b45309", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
+                                  ❓ Révéler les Ingrédients & Allergènes
                                 </button>
                               )}
                             </div>
