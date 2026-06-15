@@ -4,24 +4,31 @@ const { useState, useMemo, useEffect } = React;
 function detectAllergens(ingredients, name) {
   const allergens = [];
   const text = (ingredients.join(" ") + " " + name).toLowerCase();
-  if (text.includes("thon") || text.includes("saumon") || text.includes("merlu") || text.includes("limande") || text.includes("poisson")) allergens.push("Poissons");
-  if (text.includes("crevette") || text.includes("homard") || text.includes("crustacé")) allergens.push("Crustacés");
-  if (text.includes("œuf") || text.includes("oeuf") || text.includes("mayonnaise") || text.includes("caesar") || text.includes("tartare")) allergens.push("Œufs");
-  if (text.includes("lait") || text.includes("crème") || text.includes("cheddar") || text.includes("chèvre") || text.includes("mozzarella") || text.includes("burrata") || text.includes("feta") || text.includes("cheese") || text.includes("camembert") || text.includes("grana") || text.includes("padano") || text.includes("yaourt") || text.includes("yolita")) allergens.push("Lait (Lactose)");
-  if (text.includes("noix") || text.includes("amande") || text.includes("pistache")) allergens.push("Fruits à coque");
-  if (text.includes("céleri") || text.includes("celeri")) allergens.push("Céleri");
-  if (text.includes("moutarde")) allergens.push("Moutarde");
-  if (text.includes("sésame") || text.includes("sesame")) allergens.push("Graines de sésame");
-  if (text.includes("edamames") || text.includes("thaï") || text.includes("yum")) allergens.push("Soja");
-  if (text.includes("spritz") || text.includes("vin") || text.includes("prosecco") || text.includes("aperol") || text.includes("martini") || text.includes("confit")) allergens.push("Anhydride sulfureux & Sulfites");
-  if ((text.includes("focaccia") || text.includes("pita") || text.includes("blini") || text.includes("chou") || text.includes("panure") || text.includes("chapelure") || text.includes("muesli") || text.includes("toast") || text.includes("gnocchis") || text.includes("gaufre") || text.includes("pancake") || text.includes("céréales") || text.includes("burger") || text.includes("pain") || text.includes("boulgour")) && !text.includes("sans gluten")) {
-    allergens.push("Céréales contenant du gluten");
+  const add = (label) => { if (!allergens.includes(label)) allergens.push(label); };
+
+  if (text.includes("thon") || text.includes("saumon") || text.includes("merlu") || text.includes("limande") || text.includes("poisson") || text.includes("gravlax")) add("Poissons");
+  if (text.includes("crevette") || text.includes("homard") || text.includes("crustacé") || text.includes("lobster")) add("Crustacés");
+  if (text.includes("œuf") || text.includes("oeuf") || text.includes("brouillade") || text.includes("mayonnaise") || text.includes("caesar") || text.includes("tartare") || text.includes("meringue") || text.includes("pancake") || text.includes("gaufre") || text.includes("chou") || text.includes("profiterole") || text.includes("cheesecake")) add("Œufs");
+  if (text.includes("lait") || text.includes("lactose") || text.includes("crème") || text.includes("cheddar") || text.includes("chèvre") || text.includes("mozzarella") || text.includes("burrata") || text.includes("feta") || text.includes("cheese") || text.includes("camembert") || text.includes("grana") || text.includes("padano") || text.includes("yaourt") || text.includes("yogurt") || text.includes("yolita") || text.includes("glace") || text.includes("vanille") || text.includes("nougat") || text.includes("chocolat au lait") || text.includes("cappuccino") || text.includes("latte")) add("Lait (Lactose)");
+  if (text.includes("noix") || text.includes("amande") || text.includes("pistache") || text.includes("praliné") || text.includes("noisette")) add("Fruits à coque");
+  if (text.includes("cacahuète") || text.includes("arachide")) add("Arachides");
+  if (text.includes("céleri") || text.includes("celeri")) add("Céleri");
+  if (text.includes("moutarde")) add("Moutarde");
+  if (text.includes("sésame") || text.includes("sesame")) add("Graines de sésame");
+  if (text.includes("edamames") || text.includes("soja") || text.includes("thaï") || text.includes("tom yum") || text.includes("sweet chili")) add("Soja");
+  if (text.includes("spritz") || text.includes("vin") || text.includes("prosecco") || text.includes("aperol") || text.includes("martini") || text.includes("cidre") || text.includes("confit") || text.includes("vinaigre") || text.includes("vinaigrette") || text.includes("chutney") || text.includes("olive")) add("Anhydride sulfureux & Sulfites");
+  if ((text.includes("focaccia") || text.includes("pita") || text.includes("blini") || text.includes("chou") || text.includes("panure") || text.includes("pané") || text.includes("chapelure") || text.includes("panko") || text.includes("muesli") || text.includes("toast") || text.includes("toasts") || text.includes("gnocchi") || text.includes("gaufre") || text.includes("pancake") || text.includes("céréales") || text.includes("burger") || text.includes("pain") || text.includes("brioche") || text.includes("boulgour") || text.includes("tarte") || text.includes("cheesecake") || text.includes("gâteau") || text.includes("bière") || text.includes("ipa")) && !text.includes("sans gluten")) {
+    add("Céréales contenant du gluten");
   }
   return allergens;
 }
-
 function getIngredientStyle(name) {
   const lower = name.toLowerCase().trim();
+  if (lower.includes("pomme") || lower.includes("tatin")) return { bg: "#fff7ed", text: "#9a3412", border: "#fed7aa" };
+  if (lower.includes("gingembre") || lower.includes("coriandre") || lower.includes("persil") || lower.includes("verveine")) return { bg: "#f0fdf4", text: "#166534", border: "#bbf7d0" };
+  if (lower.includes("coco") || lower.includes("noix de coco")) return { bg: "#f8fafc", text: "#334155", border: "#cbd5e1" };
+  if (lower.includes("bière") || lower.includes("cidre") || lower.includes("vin ") || lower.includes("aop")) return { bg: "#fff7ed", text: "#9a3412", border: "#fed7aa" };
+  if (lower.includes("glace") || lower.includes("sorbet") || lower.includes("yogurt") || lower.includes("yolita")) return { bg: "#f0f9ff", text: "#0369a1", border: "#bae6fd" };
   if (lower.includes("choix") || lower.includes("chois")) return { bg: "#fffbeb", text: "#b45309", border: "#fde047" };
   if (lower === "yolita") return { bg: "#f3e8ff", text: "#7e22ce", border: "#c084fc" };
   if (lower.includes("framboise") || lower === "hibiscus") return { bg: "#fce7f3", text: "#db2777", border: "#fbcfe8" };
