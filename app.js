@@ -34,8 +34,13 @@ function unique(values) {
   return [...new Set(values.filter(Boolean))];
 }
 
+function percent(value, total) {
+  if (!total) return 0;
+  return Math.round((value / total) * 100);
+}
+
 // Moteur de détection d'allergènes partagé.
-// Il sert pour la révision. Pour un vrai client allergique, toujours vérifier la fiche allergènes officielle du restaurant.
+// Il sert pour la révision. Pour un vrai client allergique, toujours vérifier en cuisine.
 function detectAllergens(ingredients, name) {
   const allergens = [];
   const text = normalizeText((ingredients || []).join(" ") + " " + name);
@@ -112,7 +117,7 @@ function getTrapNotes(item, sectionKey = "") {
   if (text.includes("homard")) push("Sir Homard Lobster : chair de homard américain et poissons.");
   if (text.includes("cheddar en plus")) push("Upsell : proposer sauce cheddar en plus sur les plats concernés.");
   if (text.includes("double ton pastrami")) push("Upsell : possibilité de doubler le pastrami.");
-  if (text.includes("saumon fumé en plus")) push("Upsell : saumon fumé en plus, encore meilleur avec avocat.");
+  if (text.includes("saumon fume en plus")) push("Upsell : saumon fumé en plus, encore meilleur avec avocat.");
   if (text.includes("coco") && text.includes("rhum")) push("Cocktail tropical : coco + rhum Bacardi Carta Oro, souvent à relier aux Pina/Danse Joséphine.");
 
   return unique(traps);
@@ -220,12 +225,13 @@ function shuffle(array) {
   return copy;
 }
 
+
 function MainApp() {
   const [activeTab, setActiveTab] = useState("plats");
   const [expandedCat, setExpandedCat] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [mode, setMode] = useState("learn");
-  const [flashcardMode, setFlashcardMode] = useState(false);
+  const [flashcardMode, setFlashcardMode] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [clientIdx, setClientIdx] = useState(0);
   const [showClientAnswer, setShowClientAnswer] = useState(false);
@@ -261,8 +267,16 @@ function MainApp() {
     const known = allItems.filter((info) => getProgress(info.key).known).length;
     const review = weakItems.length;
     const mistakes = Object.values(progress).reduce((acc, p) => acc + (p.mistakes || 0), 0);
-    return { total: allItems.length, known, review, mistakes };
+    return { total: allItems.length, known, review, mistakes, mastery: percent(known, allItems.length) };
   }, [allItems, progress, weakItems]);
+
+  const sectionSummaries = useMemo(() => {
+    return Object.entries(window.SECTIONS).map(([key, sec]) => {
+      const items = allItems.filter((info) => info.sectionKey === key);
+      const known = items.filter((info) => getProgress(info.key).known).length;
+      return { key, section: sec, total: items.length, known, mastery: percent(known, items.length) };
+    });
+  }, [allItems, progress]);
 
   const filteredItems = useMemo(() => {
     const query = normalizeText(searchQuery);
@@ -270,6 +284,8 @@ function MainApp() {
     const tokens = query.split(/\s+/).filter(Boolean);
     return allItems.filter((info) => tokens.every((token) => info.searchText.includes(token)));
   }, [searchQuery, allItems]);
+
+  const quickSearches = ["saumon", "pistou", "mangue", "céleri", "sans gluten", "Bacardi", "pomme Bio", "feta"];
 
   useEffect(() => localStorage.setItem(STORAGE_KEYS.progress, JSON.stringify(progress)), [progress]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.quizPool, JSON.stringify(questionsPool)), [questionsPool]);
@@ -295,9 +311,7 @@ function MainApp() {
   };
 
   const resetProgress = () => {
-    if (confirm("Réinitialiser toute ta progression de révision ?")) {
-      setProgress({});
-    }
+    if (confirm("Réinitialiser toute ta progression de révision ?")) setProgress({});
   };
 
   const buildExamSimulator = (scope = quizScope) => {
@@ -308,35 +322,35 @@ function MainApp() {
       const item = info.item;
       pool.push({
         itemKey: info.key,
-        q: `Quelle est la composition exacte et complète du produit suivant : "${item.name}" ?`,
-        a: `Ingrédients requis : ${(item.ingredients || []).join(", ")}.`,
-        cat: `${info.section.label} - Ingrédients`
+        q: `Quelle est la composition complète de "${item.name}" ?`,
+        a: `Ingrédients : ${(item.ingredients || []).join(", ")}.`,
+        cat: `${info.section.label} · Ingrédients`
       });
 
       if (item.memo) {
         pool.push({
           itemKey: info.key,
-          q: `Quel est le point de vigilance ou mémo à retenir pour : "${item.name}" ?`,
+          q: `Quel mémo faut-il retenir pour "${item.name}" ?`,
           a: item.memo,
-          cat: `${info.section.label} - Mémo`
+          cat: `${info.section.label} · Mémo`
         });
       }
 
       if (info.traps.length > 0) {
         pool.push({
           itemKey: info.key,
-          q: `Quel piège opérationnel dois-tu connaître pour : "${item.name}" ?`,
+          q: `Quel piège faut-il connaître pour "${item.name}" ?`,
           a: info.traps.join(" "),
-          cat: "⚠️ Pièges carte"
+          cat: "⚠️ Pièges"
         });
       }
 
       if (info.allergens.length > 0) {
         pool.push({
           itemKey: info.key,
-          q: `Quels allergènes majeurs dois-tu repérer pour la recette : "${item.name}" ?`,
+          q: `Quels allergènes probables repérer pour "${item.name}" ?`,
           a: `Allergènes probables pour révision : ${info.allergens.join(", ")}. Pour un vrai client, vérifier en cuisine.`,
-          cat: "🛡️ Sécurité & allergènes"
+          cat: "🛡️ Allergènes"
         });
       }
     });
@@ -378,18 +392,13 @@ function MainApp() {
 
   const activeClientScenario = clientScenarios[clientIdx % clientScenarios.length];
 
-  const nextClientScenario = () => {
-    setClientIdx((prev) => (prev + 1) % clientScenarios.length);
-    setShowClientAnswer(false);
-  };
-
   const navItems = [
-    { id: "learn", label: "💡 Carte" },
-    { id: "search", label: "🔎 Recherche" },
-    { id: "review", label: `🧠 À revoir${stats.review ? ` (${stats.review})` : ""}` },
-    { id: "client", label: "🎭 Client réel" },
-    { id: "allergens_tab", label: "🛡️ Allergènes" },
-    { id: "quiz", label: "🎯 Quiz" }
+    { id: "learn", label: "Carte" },
+    { id: "search", label: "Recherche" },
+    { id: "review", label: `À revoir${stats.review ? ` · ${stats.review}` : ""}` },
+    { id: "client", label: "Mise en situation" },
+    { id: "allergens_tab", label: "Allergènes" },
+    { id: "quiz", label: "Quiz" }
   ];
 
   function ProductCard({ info, forceReveal = false, showPath = false }) {
@@ -398,32 +407,37 @@ function MainApp() {
     const isRevealed = forceReveal || expandedItem === info.key || !flashcardMode;
 
     return (
-      <div className="card-ui" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", border: "1px solid #cbd5e1" }}>
-        <div style={{ padding: "16px", borderBottom: "1px solid #f1f5f9", background: "#ffffff" }}>
-          {showPath && (
-            <div style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 900, textTransform: "uppercase", marginBottom: 6 }}>
-              {info.section.label} · {info.category.emoji} {info.category.label}
+      <article className="product panel" style={{ "--accent": info.section.color }}>
+        <div className="product-accent" />
+        <div className="product-head">
+          <div>
+            {showPath && <div className="path">{info.section.label} · {info.category.label}</div>}
+            <div className="product-title">{item.name}</div>
+            <div className="badges">
+              <span className="badge">{(item.ingredients || []).length} ingrédients</span>
+              {info.traps.length > 0 && <span className="badge warn">{info.traps.length} piège{info.traps.length > 1 ? "s" : ""}</span>}
+              {info.allergens.length > 0 && <span className="badge err">{info.allergens.length} allergène{info.allergens.length > 1 ? "s" : ""}</span>}
             </div>
-          )}
-          <div style={{ fontWeight: 955, fontSize: 15, color: "var(--text-dark)", lineHeight: 1.35 }}>{item.name}</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-            {p.known && <span className="pill-ui" style={{ background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" }}>✅ maîtrisé</span>}
-            {p.review && <span className="pill-ui" style={{ background: "#fff7ed", color: "#9a3412", border: "1px solid #fed7aa" }}>🧠 à revoir</span>}
-            {(p.mistakes || 0) > 0 && <span className="pill-ui" style={{ background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca" }}>❌ {p.mistakes} erreur{p.mistakes > 1 ? "s" : ""}</span>}
-            {(p.successes || 0) > 0 && <span className="pill-ui" style={{ background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe" }}>🔥 {p.successes} réussite{p.successes > 1 ? "s" : ""}</span>}
+            <div className="badges">
+              {p.known && <span className="badge ok">Maîtrisé</span>}
+              {p.review && <span className="badge warn">À revoir</span>}
+              {(p.mistakes || 0) > 0 && <span className="badge err">{p.mistakes} erreur{p.mistakes > 1 ? "s" : ""}</span>}
+              {(p.successes || 0) > 0 && <span className="badge info">{p.successes} réussite{p.successes > 1 ? "s" : ""}</span>}
+            </div>
           </div>
+          <div className="emoji-box">{info.category.emoji}</div>
         </div>
 
-        <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="product-body">
           {isRevealed ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 900, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>Fiche ingrédients</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <>
+              <div className="info-box">
+                <div className="box-title">Ingrédients</div>
+                <div className="ingredient-list">
                   {(item.ingredients || []).map((ing, j) => {
                     const colors = getIngredientStyle(ing);
                     return (
-                      <span key={j} style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}`, borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 800 }}>
+                      <span key={j} className="ingredient" style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}>
                         {ing}
                       </span>
                     );
@@ -432,299 +446,138 @@ function MainApp() {
               </div>
 
               {info.traps.length > 0 && (
-                <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 12, padding: 12 }}>
-                  <div style={{ fontSize: 9, fontWeight: 900, color: "#92400e", textTransform: "uppercase", marginBottom: 7 }}>⚠️ Pièges à connaître</div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {info.traps.map((trap, i) => (
-                      <div key={i} style={{ fontSize: 11, color: "#78350f", lineHeight: 1.45, fontWeight: 700 }}>• {trap}</div>
-                    ))}
+                <div className="info-box trap">
+                  <div className="box-title">Pièges à connaître</div>
+                  <div className="box-text">
+                    {info.traps.map((trap, i) => <div key={i}>• {trap}</div>)}
                   </div>
                 </div>
               )}
 
               {info.allergens.length > 0 && (
-                <div style={{ borderTop: "1px dashed #cbd5e1", paddingTop: 12 }}>
-                  <div style={{ fontSize: 9, fontWeight: 900, color: "#be123c", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>🛡️ Allergènes probables pour révision</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                <div className="info-box allergens">
+                  <div className="box-title" style={{ color: "var(--red)" }}>Allergènes probables</div>
+                  <div className="ingredient-list">
                     {info.allergens.map((algName, k) => {
                       const matched = window.OFFICIAL_ALLERGENS.find(a => a.name === algName);
                       return (
-                        <span key={k} style={{ background: matched?.color.bg || "#fff1f2", color: matched?.color.text || "#be123c", border: `1px solid ${matched?.color.border || "#fecdd3"}`, borderRadius: 6, padding: "3px 8px", fontSize: 10, fontWeight: 900 }}>
+                        <span key={k} className="ingredient" style={{ background: matched?.color.bg || "#fff1f2", color: matched?.color.text || "#be123c", border: `1px solid ${matched?.color.border || "#fecdd3"}` }}>
                           {algName}
                         </span>
                       );
                     })}
                   </div>
-                  <div style={{ marginTop: 7, fontSize: 10, color: "#64748b", lineHeight: 1.4, fontWeight: 700 }}>
-                    Outil de révision uniquement. Pour un vrai client allergique, vérifier en cuisine.
+                  <div className="muted" style={{ marginTop: 8, fontSize: 11 }}>
+                    Révision uniquement. Pour un vrai client allergique, vérifier en cuisine.
                   </div>
                 </div>
               )}
 
               {item.memo && (
-                <div style={{ background: "#fffdf5", border: "1px solid #fde047", borderRadius: 10, padding: "12px", fontSize: 11, color: "#78350f", lineHeight: 1.5, fontWeight: 600 }}>
-                  <strong>⚡ MÉMO :</strong> {item.memo}
+                <div className="info-box memo">
+                  <div className="box-title">Mémo</div>
+                  <div className="box-text">{item.memo}</div>
                 </div>
               )}
-            </div>
+            </>
           ) : (
-            <button onClick={() => setExpandedItem(info.key)} className="touch-target btn-interactive" style={{ width: "100%", padding: "14px", background: "#fffbeb", border: "1px dashed #d97706", borderRadius: 10, color: "#b45309", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>
-              ❓ Révéler ingrédients, allergènes & pièges
+            <button className="reveal" onClick={() => setExpandedItem(info.key)}>
+              Révéler la fiche
             </button>
           )}
         </div>
 
-        <div style={{ display: "flex", gap: 8, padding: "0 16px 16px" }}>
-          <button onClick={() => markItem(info.key, "review")} className="touch-target btn-interactive" style={{ flex: 1, padding: "10px", background: "#fff7ed", color: "#9a3412", border: "1px solid #fed7aa", borderRadius: 12, fontWeight: 900, fontSize: 12, cursor: "pointer" }}>🧠 Je ne connais pas</button>
-          <button onClick={() => markItem(info.key, "known")} className="touch-target btn-interactive" style={{ flex: 1, padding: "10px", background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", borderRadius: 12, fontWeight: 900, fontSize: 12, cursor: "pointer" }}>✅ Je connais</button>
+        <div className="actions">
+          <button className="action-btn review" onClick={() => markItem(info.key, "review")}>À revoir</button>
+          <button className="action-btn know" onClick={() => markItem(info.key, "known")}>Je connais</button>
         </div>
-      </div>
+      </article>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ background: "linear-gradient(135deg, #010f05 0%, var(--primary-green) 100%)", padding: "35px 16px 24px", textAlign: "center", boxShadow: "0 10px 30px rgba(6,36,16,0.15)" }}>
-        <div style={{ fontSize: "clamp(22px, 5vw, 36px)", fontWeight: 955, color: "var(--accent-gold)", letterSpacing: 2, textTransform: "uppercase" }}>🌴 MASTERMIND PARADIS</div>
-        <div style={{ color: "#bbf7d0", fontSize: 12, marginTop: 6, marginBottom: 18, fontWeight: 800, textTransform: "uppercase", letterSpacing: 1.2 }}>
-        </div>
-
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 18 }}>
-          <div className="mini-stat"><div style={{ fontSize: 11, opacity: 0.78, fontWeight: 800 }}>Fiches</div><div style={{ fontSize: 20, fontWeight: 955 }}>{stats.total}</div></div>
-          <div className="mini-stat"><div style={{ fontSize: 11, opacity: 0.78, fontWeight: 800 }}>Maîtrisées</div><div style={{ fontSize: 20, fontWeight: 955 }}>{stats.known}</div></div>
-          <div className="mini-stat"><div style={{ fontSize: 11, opacity: 0.78, fontWeight: 800 }}>À revoir</div><div style={{ fontSize: 20, fontWeight: 955 }}>{stats.review}</div></div>
-          <div className="mini-stat"><div style={{ fontSize: 11, opacity: 0.78, fontWeight: 800 }}>Erreurs</div><div style={{ fontSize: 20, fontWeight: 955 }}>{stats.mistakes}</div></div>
-        </div>
-
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-          {navItems.map(m => (
-            <button key={m.id}
-              onClick={() => setMode(m.id)}
-              className="touch-target btn-interactive"
-              style={{
-                padding: "10px 16px", borderRadius: "12px", border: "none", cursor: "pointer", fontWeight: 850, fontSize: 12,
-                background: mode === m.id ? "var(--accent-gold)" : "rgba(255,255,255,0.08)",
-                color: mode === m.id ? "var(--primary-green)" : "#ffffff",
-                boxShadow: mode === m.id ? "0 4px 15px rgba(234,179,8,0.3)" : "none"
-              }}>
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {mode === "quiz" && (
-        <div style={{ maxWidth: 720, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-            <button onClick={() => resetQuizStorage("all")} className="touch-target btn-interactive" style={{ flex: 1, minWidth: 180, padding: "12px", background: quizScope === "all" ? "var(--primary-green)" : "#ffffff", color: quizScope === "all" ? "#fff" : "var(--text-dark)", border: "1px solid #cbd5e1", borderRadius: 12, fontWeight: 900, cursor: "pointer" }}>🎯 Examen complet</button>
-            <button onClick={() => resetQuizStorage("weak")} className="touch-target btn-interactive" style={{ flex: 1, minWidth: 180, padding: "12px", background: quizScope === "weak" ? "var(--primary-green)" : "#ffffff", color: quizScope === "weak" ? "#fff" : "var(--text-dark)", border: "1px solid #cbd5e1", borderRadius: 12, fontWeight: 900, cursor: "pointer" }}>🧠 Quiz erreurs uniquement</button>
-          </div>
-
-          {quizFinished ? (
-            <div className="card-ui" style={{ textAlign: "center", padding: "40px 24px" }}>
-              <div style={{ fontSize: 72 }}>🏆</div>
-              <div style={{ fontSize: 26, fontWeight: 955, marginTop: 16, color: "var(--text-dark)" }}>Évaluation terminée</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--primary-green)", marginTop: 10, background: "#f0fdf4", display: "inline-block", padding: "8px 20px", borderRadius: 99 }}>
-                Score : {score.ok} / {questionsPool.length} ({questionsPool.length > 0 ? Math.round((score.ok / questionsPool.length) * 100) : 0}%)
-              </div>
-              <button onClick={() => resetQuizStorage(quizScope)} className="touch-target btn-interactive" style={{ width: "100%", marginTop: 30, padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 800, fontSize: 15, cursor: "pointer", boxShadow: "0 4px 15px rgba(6,36,16,0.2)" }}>
-                🔄 Recommencer ce mode
-              </button>
-            </div>
-          ) : questionsPool.length > 0 ? (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, padding: "0 4px", gap: 10 }}>
-                <span style={{ color: "var(--text-muted)", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5 }}>Progression : {quizIdx + 1} / {questionsPool.length}</span>
-                <span style={{ fontSize: 12, fontWeight: 800, background: "#ffffff", padding: "6px 14px", borderRadius: 99, border: "1px solid #cbd5e1" }}>✅ {score.ok} · ❌ {score.nok}</span>
-              </div>
-
-              <div className="card-ui" style={{ padding: "30px 24px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 10 }}>
-                  <div style={{ fontSize: 10, color: "var(--primary-green)", textTransform: "uppercase", fontWeight: 900, background: "#e6f4ea", padding: "6px 12px", borderRadius: 8, border: "1px solid #bbf7d0" }}>
-                    {questionsPool[quizIdx].cat}
-                  </div>
-                  <button onClick={() => resetQuizStorage(quizScope)} style={{ background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
-                    Nouveau tirage 🔄
-                  </button>
-                </div>
-
-                <div style={{ fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 950, lineHeight: 1.4, color: "var(--text-dark)", marginBottom: 30 }}>
-                  {questionsPool[quizIdx].q}
-                </div>
-
-                {!showAnswer ? (
-                  <button onClick={() => setShowAnswer(true)} className="touch-target btn-interactive" style={{ width: "100%", padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 800, fontSize: 15, cursor: "pointer", boxShadow: "0 4px 15px rgba(6,36,16,0.15)" }}>
-                    👁️ Vérifier la réponse
-                  </button>
-                ) : (
-                  <div className="animate-fade">
-                    <div style={{ background: "#f0fdf4", borderRadius: 16, padding: 20, marginBottom: 25, borderLeft: "5px solid #16a34a" }}>
-                      <div style={{ fontWeight: 800, color: "#14532d", fontSize: 15, lineHeight: 1.6 }}>
-                        {questionsPool[quizIdx].a}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 12 }}>
-                      <button onClick={() => handleNextQuestion(false)} className="touch-target btn-interactive" style={{ flex: 1, padding: "14px", background: "#fef2f2", color: "#991b1b", border: "1px solid #fee2e2", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>❌ À revoir</button>
-                      <button onClick={() => handleNextQuestion(true)} className="touch-target btn-interactive" style={{ flex: 1, padding: "14px", background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>✅ Maîtrisé</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="card-ui" style={{ textAlign: "center", padding: 36 }}>
-              <button onClick={() => buildExamSimulator("all")} className="touch-target btn-interactive" style={{ padding: "12px 24px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 12, fontWeight: 800, cursor: "pointer" }}>
-                🚀 Générer le pool de questions
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {mode === "allergens_tab" && (
-        <div style={{ maxWidth: 900, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
-          <div className="card-ui" style={{ marginBottom: 20, padding: 20, borderLeft: "5px solid #dc2626", background: "#fff7ed" }}>
-            <h3 style={{ margin: "0 0 6px 0", color: "#991b1b", fontWeight: 955, fontSize: 18 }}>⚠️ Important allergènes</h3>
-            <p style={{ margin: 0, fontSize: 13, color: "#7c2d12", lineHeight: 1.55, fontWeight: 700 }}>
-              Cette application est un outil de révision. Le détecteur fonctionne par mots-clés et peut rater des traces, préparations, contaminations croisées ou changements de recette. Pour un vrai client allergique, on vérifie toujours en cuisine.
-            </p>
-          </div>
-          <div className="card-ui" style={{ marginBottom: 20, padding: 20, borderLeft: "5px solid var(--primary-green)" }}>
-            <h3 style={{ margin: "0 0 6px 0", color: "var(--primary-green)", fontWeight: 955, fontSize: 18 }}>🛡️ Les 14 allergènes majeurs réglementaires</h3>
-            <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5, fontWeight: 500 }}>
-              Référentiel de base pour apprendre les familles d'allergènes et les réflexes de contrôle.
-            </p>
-          </div>
-          <div className="responsive-grid">
-            {window.OFFICIAL_ALLERGENS.map((alg) => (
-              <div key={alg.id} className="card-ui card-hover" style={{ padding: 18, borderTop: `4px solid ${alg.color.border}` }}>
-                <span style={{ background: alg.color.bg, color: alg.color.text, border: `1px solid ${alg.color.border}`, padding: "4px 10px", borderRadius: 8, fontSize: 12, fontWeight: 900, display: "inline-block" }}>
-                  {alg.name}
-                </span>
-                <p style={{ margin: "12px 0 0 0", fontSize: 13, color: "var(--text-dark)", fontWeight: 600, lineHeight: 1.5 }}>{alg.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {mode === "search" && (
-        <div style={{ maxWidth: 1200, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
-          <div className="card-ui" style={{ padding: 18, marginBottom: 18 }}>
-            <div style={{ fontSize: 18, fontWeight: 955, color: "var(--text-dark)", marginBottom: 10 }}>🔎 Recherche instantanée</div>
-            <input className="input-ui" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Tape saumon, céleri, pistou, sans gluten, Bacardi, mangue..." autoFocus />
-            <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-muted)", fontWeight: 800 }}>
-              {searchQuery ? `${filteredItems.length} résultat(s)` : "Recherche dans noms, ingrédients, mémos, pièges et allergènes."}
-            </div>
-          </div>
-
-          {searchQuery && (
-            <div className="responsive-grid">
-              {filteredItems.map((info) => <ProductCard key={info.key} info={info} forceReveal={true} showPath={true} />)}
-            </div>
-          )}
-        </div>
-      )}
-
-      {mode === "review" && (
-        <div style={{ maxWidth: 1200, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
-          <div className="card-ui" style={{ padding: 18, marginBottom: 18, display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 955, color: "var(--text-dark)" }}>🧠 Fiches à revoir</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 800, marginTop: 4 }}>Triées par nombre d'erreurs. Le cerveau adore qu'on lui serve les fantômes un par un.</div>
-            </div>
-            <button onClick={resetProgress} className="touch-target btn-interactive" style={{ padding: "10px 14px", background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", borderRadius: 12, fontWeight: 900, cursor: "pointer" }}>Réinitialiser progression</button>
-          </div>
-
-          {weakItems.length === 0 ? (
-            <div className="card-ui" style={{ padding: 34, textAlign: "center" }}>
-              <div style={{ fontSize: 48 }}>🌱</div>
-              <div style={{ fontSize: 20, fontWeight: 955, color: "var(--text-dark)", marginTop: 10 }}>Aucune fiche à revoir pour l'instant</div>
-              <p style={{ color: "var(--text-muted)", fontWeight: 700 }}>Clique sur “Je ne connais pas” dans la carte ou rate des questions en quiz pour alimenter cette zone.</p>
-            </div>
-          ) : (
-            <div className="responsive-grid">
-              {weakItems.map((info) => <ProductCard key={info.key} info={info} forceReveal={true} showPath={true} />)}
-            </div>
-          )}
-        </div>
-      )}
-
-      {mode === "client" && activeClientScenario && (
-        <div style={{ maxWidth: 900, width: "100%", margin: "25px auto", padding: "0 16px", boxSizing: "border-box" }} className="animate-fade">
-          <div className="card-ui" style={{ padding: "28px 22px", marginBottom: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
+    <>
+      <header className="topbar">
+        <div className="topbar-inner">
+          <div className="brand-row">
+            <div className="brand">
+              <div className="logo">🌴</div>
               <div>
-                <div style={{ fontSize: 10, color: "var(--primary-green)", textTransform: "uppercase", fontWeight: 900, background: "#e6f4ea", padding: "6px 12px", borderRadius: 8, border: "1px solid #bbf7d0", display: "inline-block" }}>Simulation comptoir</div>
-                <h2 style={{ margin: "14px 0 6px", fontSize: "clamp(20px, 5vw, 28px)", lineHeight: 1.25, color: "var(--text-dark)" }}>{activeClientScenario.title}</h2>
+                <h1 className="brand-title">Paradis Revision</h1>
+                <div className="brand-subtitle">Carte · Quiz</div>
               </div>
-              <button onClick={nextClientScenario} className="touch-target btn-interactive" style={{ padding: "10px 14px", background: "#f1f5f9", color: "var(--text-dark)", border: "none", borderRadius: 12, fontWeight: 900, cursor: "pointer" }}>Suivant 🎲</button>
             </div>
-
-            <div style={{ fontSize: 18, fontWeight: 900, color: "var(--text-dark)", lineHeight: 1.45, marginBottom: 18 }}>
-              “{activeClientScenario.prompt}”
-            </div>
-
-            {!showClientAnswer ? (
-              <button onClick={() => setShowClientAnswer(true)} className="touch-target btn-interactive" style={{ width: "100%", padding: "16px", background: "var(--primary-green)", color: "#fff", border: "none", borderRadius: 14, fontWeight: 900, cursor: "pointer" }}>👁️ Voir la réponse type</button>
-            ) : (
-              <div className="animate-fade">
-                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 10, fontWeight: 900, color: "#166534", textTransform: "uppercase", marginBottom: 8 }}>Réflexe professionnel</div>
-                  <div style={{ fontSize: 14, color: "#14532d", fontWeight: 800, lineHeight: 1.55 }}>{activeClientScenario.strategy}</div>
-                </div>
-
-                {activeClientScenario.items.length > 0 ? (
-                  <div className="responsive-grid">
-                    {activeClientScenario.items.map((info) => <ProductCard key={info.key} info={info} forceReveal={true} showPath={true} />)}
-                  </div>
-                ) : (
-                  <div style={{ color: "var(--text-muted)", fontWeight: 800 }}>Aucun produit trouvé automatiquement. Vérifie la carte complète.</div>
-                )}
-              </div>
-            )}
+            <div className="score-pill">{stats.mastery}% maîtrisé</div>
           </div>
+
+          <div className="progress-line">
+            <div className="progress-fill" style={{ width: `${stats.mastery}%` }} />
+          </div>
+
+          <nav className="nav">
+            {navItems.map((item) => (
+              <button key={item.id} onClick={() => setMode(item.id)} className={`nav-btn ${mode === item.id ? "active" : ""}`}>
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
-      )}
+      </header>
 
-      {mode === "learn" && (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%" }}>
-          <div className="tab-container" style={{ display: "flex", gap: 8, padding: "14px 16px", background: "var(--panel-bg)", borderBottom: "1px solid #cbd5e1", overflowX: "auto", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", gap: 8 }}>
-              {Object.entries(window.SECTIONS).map(([key, s]) => {
-                const totalItems = Object.values(s.categories).reduce((acc, cat) => acc + cat.items.length, 0);
-                return (
-                  <button key={key} onClick={() => { setActiveTab(key); setExpandedCat(null); setExpandedItem(null); }}
-                    className="touch-target btn-interactive"
-                    style={{
-                      padding: "10px 18px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 13, whiteSpace: "nowrap",
-                      background: activeTab === key ? s.color : "#f1f5f9",
-                      color: activeTab === key ? "#fff" : "var(--text-muted)",
-                      boxShadow: activeTab === key ? `0 4px 12px ${s.color}40` : "none"
-                    }}>
-                    {s.label} ({totalItems})
-                  </button>
-                );
-              })}
+      <main className="app">
+        <section className="dashboard">
+          <div className="stat"><div className="stat-label">Fiches</div><div className="stat-value">{stats.total}</div></div>
+          <div className="stat"><div className="stat-label">Maîtrisées</div><div className="stat-value">{stats.known}</div></div>
+          <div className="stat"><div className="stat-label">À revoir</div><div className="stat-value">{stats.review}</div></div>
+          <div className="stat"><div className="stat-label">Erreurs</div><div className="stat-value">{stats.mistakes}</div></div>
+        </section>
+
+        {mode === "learn" && (
+          <section>
+            <div className="view-title">
+              <div>
+                <div className="eyebrow">Révision simple</div>
+                <h2 className="h2">Apprendre la carte</h2>
+                <div className="muted">Choisis une famille, ouvre une catégorie, puis révise fiche par fiche.</div>
+              </div>
+              <button className={`action-btn ${flashcardMode ? "primary" : "neutral"}`} onClick={() => setFlashcardMode(!flashcardMode)} style={{ padding: "0 14px" }}>
+                {flashcardMode ? "Mode cache actif" : "Tout affiché"}
+              </button>
             </div>
-            <button onClick={() => setFlashcardMode(!flashcardMode)} className="touch-target btn-interactive" style={{ padding: "10px 16px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 800, fontSize: 12, whiteSpace: "nowrap", background: flashcardMode ? "var(--primary-green)" : "#e2e8f0", color: flashcardMode ? "#fff" : "var(--text-dark)" }}>
-              {flashcardMode ? "👁️ Tout afficher" : "🙈 Mode cache"}
-            </button>
-          </div>
 
-          <div style={{ padding: "20px 16px", width: "100%", boxSizing: "border-box", maxWidth: 1200, margin: "0 auto" }}>
+            <div className="section-tabs">
+              {sectionSummaries.map((sum) => (
+                <button
+                  key={sum.key}
+                  className={`section-btn ${activeTab === sum.key ? "active" : ""}`}
+                  style={{ "--section-color": sum.section.color }}
+                  onClick={() => { setActiveTab(sum.key); setExpandedCat(null); setExpandedItem(null); }}
+                >
+                  <div className="section-name">{sum.section.label}</div>
+                  <div className="section-meta">{sum.total} fiches · {sum.mastery}% maîtrisé</div>
+                </button>
+              ))}
+            </div>
+
             {Object.entries(section.categories).map(([catKey, cat]) => {
               const categoryItems = allItems.filter((info) => info.sectionKey === activeTab && info.categoryKey === catKey);
+              const known = categoryItems.filter((info) => getProgress(info.key).known).length;
               return (
-                <div key={catKey} style={{ marginBottom: 20, borderRadius: 16, overflow: "hidden", background: "var(--panel-bg)", border: "1px solid #cbd5e1" }}>
-                  <button onClick={() => setExpandedCat(expandedCat === catKey ? null : catKey)} className="touch-target card-hover" style={{ width: "100%", padding: "18px 20px", background: "var(--panel-bg)", border: "none", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-                    <span style={{ fontWeight: 955, fontSize: 16, color: "var(--text-dark)" }}>{cat.emoji} &nbsp;&nbsp; {cat.label} ({cat.items.length})</span>
-                    <span style={{ color: "var(--text-muted)", fontSize: 18, fontWeight: "bold" }}>{expandedCat === catKey ? "−" : "+"}</span>
+                <div className="category panel" key={catKey}>
+                  <button className="category-head" onClick={() => setExpandedCat(expandedCat === catKey ? null : catKey)}>
+                    <div className="category-left">
+                      <div className="emoji-box">{cat.emoji}</div>
+                      <div>
+                        <div className="category-name">{cat.label}</div>
+                        <div className="category-meta">{cat.items.length} fiches · {known} maîtrisées</div>
+                      </div>
+                    </div>
+                    <strong>{expandedCat === catKey ? "−" : "+"}</strong>
                   </button>
 
                   {expandedCat === catKey && (
-                    <div style={{ padding: "16px", background: "#faf9f5", borderTop: "1px solid #cbd5e1" }}>
-                      <div className="responsive-grid">
+                    <div className="category-body">
+                      <div className="grid">
                         {categoryItems.map((info) => <ProductCard key={info.key} info={info} />)}
                       </div>
                     </div>
@@ -732,10 +585,181 @@ function MainApp() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-    </div>
+          </section>
+        )}
+
+        {mode === "search" && (
+          <section>
+            <div className="panel panel-pad" style={{ marginBottom: 14 }}>
+              <div className="view-title">
+                <div>
+                  <div className="eyebrow">Recherche</div>
+                  <h2 className="h2">Trouver rapidement</h2>
+                  <div className="muted">Recherche dans les noms, ingrédients, mémos, pièges et allergènes.</div>
+                </div>
+              </div>
+              <input className="input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Ex : saumon, céleri, pistou, Bacardi..." autoFocus />
+              <div className="quick-tags">
+                {quickSearches.map((term) => <button key={term} className="tag-btn" onClick={() => setSearchQuery(term)}>{term}</button>)}
+              </div>
+              <div className="muted" style={{ marginTop: 12 }}>{searchQuery ? `${filteredItems.length} résultat(s)` : "Tape un mot ou utilise un raccourci."}</div>
+            </div>
+
+            {searchQuery && (
+              <div className="grid">
+                {filteredItems.map((info) => <ProductCard key={info.key} info={info} forceReveal={true} showPath={true} />)}
+              </div>
+            )}
+          </section>
+        )}
+
+        {mode === "review" && (
+          <section>
+            <div className="panel panel-pad" style={{ marginBottom: 14 }}>
+              <div className="view-title" style={{ marginBottom: 0 }}>
+                <div>
+                  <div className="eyebrow">Consolidation</div>
+                  <h2 className="h2">Fiches à revoir</h2>
+                  <div className="muted">Tout ce que tu as raté ou marqué comme fragile apparaît ici.</div>
+                </div>
+                <button className="action-btn review" onClick={resetProgress} style={{ padding: "0 14px" }}>Reset</button>
+              </div>
+            </div>
+
+            {weakItems.length === 0 ? (
+              <div className="panel panel-pad">
+                <h3 style={{ margin: "0 0 6px", fontSize: 20 }}>Aucune fiche à revoir 🌱</h3>
+                <div className="muted">Utilise “À revoir” sur une fiche ou rate une question dans le quiz.</div>
+              </div>
+            ) : (
+              <div className="grid">
+                {weakItems.map((info) => <ProductCard key={info.key} info={info} forceReveal={true} showPath={true} />)}
+              </div>
+            )}
+          </section>
+        )}
+
+        {mode === "client" && activeClientScenario && (
+          <section>
+            <div className="quiz-card panel panel-pad">
+              <div className="view-title">
+                <div>
+                  <div className="eyebrow">Simulation comptoir</div>
+                  <h2 className="h2">{activeClientScenario.title}</h2>
+                </div>
+                <button
+                  className="action-btn neutral"
+                  style={{ padding: "0 14px" }}
+                  onClick={() => { setClientIdx((prev) => (prev + 1) % clientScenarios.length); setShowClientAnswer(false); }}
+                >
+                  Suivant
+                </button>
+              </div>
+
+              <div className="info-box" style={{ marginBottom: 14 }}>
+                <div className="box-title">Client</div>
+                <div style={{ fontSize: 17, lineHeight: 1.45, fontWeight: 850 }}>“{activeClientScenario.prompt}”</div>
+              </div>
+
+              {!showClientAnswer ? (
+                <button className="action-btn primary" style={{ width: "100%" }} onClick={() => setShowClientAnswer(true)}>Voir la réponse type</button>
+              ) : (
+                <>
+                  <div className="answer" style={{ marginBottom: 14 }}>{activeClientScenario.strategy}</div>
+                  <div className="grid">
+                    {activeClientScenario.items.map((info) => <ProductCard key={info.key} info={info} forceReveal={true} showPath={true} />)}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        )}
+
+        {mode === "allergens_tab" && (
+          <section>
+            <div className="panel panel-pad" style={{ marginBottom: 14, borderColor: "#fecaca" }}>
+              <div className="eyebrow" style={{ color: "var(--red)" }}>Important</div>
+              <h2 className="h2">Allergènes</h2>
+              <div className="muted">
+                Le détecteur est là pour réviser. En service, pour un vrai client allergique, on vérifie toujours la fiche officielle du restaurant.
+              </div>
+            </div>
+
+            <div className="grid">
+              {window.OFFICIAL_ALLERGENS.map((alg) => (
+                <div className="panel panel-pad" key={alg.id}>
+                  <span className="ingredient" style={{ background: alg.color.bg, color: alg.color.text, border: `1px solid ${alg.color.border}` }}>
+                    {alg.name}
+                  </span>
+                  <div className="muted" style={{ marginTop: 12, color: "var(--text)" }}>{alg.desc}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {mode === "quiz" && (
+          <section className="quiz-card">
+            <div className="view-title">
+              <div>
+                <div className="eyebrow">Entraînement actif</div>
+                <h2 className="h2">Quiz</h2>
+              </div>
+            </div>
+
+            <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", marginBottom: 12 }}>
+              <button className={`action-btn ${quizScope === "all" ? "primary" : "neutral"}`} onClick={() => resetQuizStorage("all")}>Complet</button>
+              <button className={`action-btn ${quizScope === "weak" ? "primary" : "neutral"}`} onClick={() => resetQuizStorage("weak")}>Erreurs</button>
+            </div>
+
+            {quizFinished ? (
+              <div className="panel panel-pad" style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 54 }}>🏆</div>
+                <h3 style={{ margin: "10px 0 8px", fontSize: 24 }}>Évaluation terminée</h3>
+                <div className="badge ok" style={{ justifyContent: "center" }}>
+                  Score : {score.ok} / {questionsPool.length} ({questionsPool.length > 0 ? Math.round((score.ok / questionsPool.length) * 100) : 0}%)
+                </div>
+                <button className="action-btn primary" style={{ width: "100%", marginTop: 18 }} onClick={() => resetQuizStorage(quizScope)}>Recommencer</button>
+              </div>
+            ) : questionsPool.length > 0 ? (
+              <div className="panel panel-pad">
+                <div className="view-title">
+                  <div>
+                    <div className="eyebrow">{questionsPool[quizIdx].cat}</div>
+                    <div className="muted">Question {quizIdx + 1} / {questionsPool.length} · ✅ {score.ok} · ❌ {score.nok}</div>
+                  </div>
+                  <button className="tag-btn" onClick={() => resetQuizStorage(quizScope)}>Nouveau</button>
+                </div>
+
+                <div className="progress-line" style={{ marginBottom: 18 }}>
+                  <div className="progress-fill" style={{ width: `${percent(quizIdx + 1, questionsPool.length)}%` }} />
+                </div>
+
+                <div style={{ fontSize: 21, fontWeight: 930, lineHeight: 1.35, marginBottom: 18 }}>{questionsPool[quizIdx].q}</div>
+
+                {!showAnswer ? (
+                  <button className="action-btn primary" style={{ width: "100%" }} onClick={() => setShowAnswer(true)}>Voir la réponse</button>
+                ) : (
+                  <>
+                    <div className="answer" style={{ marginBottom: 14 }}>{questionsPool[quizIdx].a}</div>
+                    <div className="actions" style={{ padding: 0 }}>
+                      <button className="action-btn review" onClick={() => handleNextQuestion(false)}>À revoir</button>
+                      <button className="action-btn know" onClick={() => handleNextQuestion(true)}>Maîtrisé</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="panel panel-pad">
+                <button className="action-btn primary" style={{ width: "100%" }} onClick={() => buildExamSimulator("all")}>Générer les questions</button>
+              </div>
+            )}
+          </section>
+        )}
+
+        <div className="footer-space" />
+      </main>
+    </>
   );
 }
 
