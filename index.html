@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Paradis du Fruit — Master Framework v6</title>
+  <title>Paradis du Fruit — Master Framework v8</title>
   
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -91,6 +91,43 @@
     @keyframes tabFade {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+  
+
+    .input-ui {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      background: #ffffff;
+      color: var(--text-dark);
+    }
+    .input-ui:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 3px rgba(7, 51, 20, 0.08);
+    }
+
+    .pill-ui {
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mini-stat {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: #fff;
+      border-radius: 14px;
+      padding: 10px 14px;
+      min-width: 92px;
     }
   </style>
 </head>
