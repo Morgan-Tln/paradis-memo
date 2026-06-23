@@ -211,7 +211,7 @@ window.SECTIONS = {
               "Cheddar fondu",
               "Pommes frites"
             ],
-            "memo": "🔥 Correction importante : ce n’est pas un burger. C’est un toast croustillant servi avec frites. Option : sauce cheddar en plus."
+            "memo": "C’est un toast croustillant servi avec frites. Option : sauce cheddar en plus."
           },
           {
             "name": "C'Bon",
