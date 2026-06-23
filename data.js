@@ -1597,7 +1597,7 @@ window.SECTIONS = {
               "Crème anglaise",
               "Crème fouettée"
             ],
-            "memo": "♥️ Naturellement sans gluten. Option carte : cœur praliné."
+            "memo": "♥️ Naturellement sans gluten."
           },
           {
             "name": "Salade de Fruits Jolie Jolie",
@@ -1702,7 +1702,7 @@ window.SECTIONS = {
               "Sauce caramel-vanille Paradis",
               "Crème fouettée"
             ],
-            "memo": "👯 Format partage : 3 gaufres géantes."
+            "memo": "👯 Format partage : 3 pièces."
           }
         ]
       },
@@ -1803,7 +1803,7 @@ window.SECTIONS = {
               "Pépites caramélisées",
               "Crème fouettée"
             ],
-            "memo": "💘 Seul ou suffisant à deux."
+            "memo": "💘 Parfait pour les couples ou les célibataires endurcis."
           },
           {
             "name": "Profiterole Très Folle",

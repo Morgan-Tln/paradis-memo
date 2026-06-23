@@ -40,14 +40,16 @@
   }
 
   function normalizeText(value) {
-    return String(value || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[’']/g, " ")
-      .replace(/[^a-z0-9]+/g, " ")
-      .trim();
-  }
+  return String(value || "")
+    .toLowerCase()
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
 
   function slugify(value) {
     return normalizeText(value).replace(/\s+/g, "-").slice(0, 90) || "item";
@@ -134,11 +136,42 @@
       if (!allergens.includes(name)) allergens.push(name);
     };
 
-    if (text.includes("thon") || text.includes("saumon") || text.includes("merlu") || text.includes("limande") || text.includes("poisson") || text.includes("gravlax")) add("Poissons");
+    const name = normalizeText(item.name || "");
+    if (
+      text.includes("thon") ||
+      text.includes("saumon") ||
+      text.includes("merlu") ||
+      text.includes("limande") ||
+      text.includes("poisson") ||
+      text.includes("gravlax") ||
+      text.includes("sauce caesar") ||
+      name === "caesar au paradis"
+    ) add("Poissons");
     if (text.includes("crevette") || text.includes("homard") || text.includes("crustace") || text.includes("lobster")) add("Crustacés");
     if (text.includes("oeuf") || text.includes("brouillade") || text.includes("mayonnaise") || text.includes("caesar") || text.includes("tartare") || text.includes("meringue") || text.includes("pancake") || text.includes("gaufre") || text.includes("chou") || text.includes("profiterole") || text.includes("cheesecake")) add("Œufs");
     const hasLaitAnimal = text.includes("lait") && !text.includes("lait de coco");
-    if (hasLaitAnimal || text.includes("creme") || text.includes("cheddar") || text.includes("chevre") || text.includes("mozzarella") || text.includes("burrata") || text.includes("feta") || text.includes("cheese") || text.includes("camembert") || text.includes("grana") || text.includes("yaourt") || text.includes("yogurt") || text.includes("yolita") || text.includes("glace") || text.includes("vanille") || text.includes("nougat") || text.includes("cappuccino") || text.includes("latte")) add("Lait / lactose");
+    const forceLactose = name === "fish chips";
+    if (
+      hasLaitAnimal ||
+      forceLactose ||
+      text.includes("creme") ||
+      text.includes("cheddar") ||
+      text.includes("chevre") ||
+      text.includes("mozzarella") ||
+      text.includes("burrata") ||
+      text.includes("feta") ||
+      text.includes("cheese") ||
+      text.includes("camembert") ||
+      text.includes("grana") ||
+      text.includes("yaourt") ||
+      text.includes("yogurt") ||
+      text.includes("yolita") ||
+      text.includes("glace") ||
+      text.includes("vanille") ||
+      text.includes("nougat") ||
+      text.includes("cappuccino") ||
+      text.includes("latte")
+    ) add("Lait / lactose");
     const hasNoixCoque = text.includes("noix") && !text.includes("noix de coco");
     if (hasNoixCoque || text.includes("amande") || text.includes("pistache") || text.includes("praline") || text.includes("noisette")) add("Fruits à coque");
     if (text.includes("celeri")) add("Céleri");
