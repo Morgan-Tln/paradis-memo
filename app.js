@@ -1136,10 +1136,10 @@
         pickItems(items, (item) => containsAny(item, nutTerms), 12)
       ),
       scenario(
-        "Client : “Je ne mange ni poisson ni fruits de mer.”",
+        "Client : “Je veux du poisson ou fruits de mer.”",
         "🐟",
         "Moyen",
-        "Réponse serveur : écarter thon, saumon, merlu, limande, crevettes, homard et sauces associées. Rediriger vers poulet, veggie, pastrami ou recettes fromage/légumes selon envie.",
+        "Réponse serveur : proposer thon, saumon, merlu, limande, crevettes, homard et sauces associées.",
         [
           "Fish & Chips = merlu.",
           "Mini Fish & Chips = limande.",
