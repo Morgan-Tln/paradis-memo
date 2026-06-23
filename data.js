@@ -699,11 +699,13 @@ window.SECTIONS = {
             "name": "3. Coleslaw",
             "ingredients": [
               "Chou",
+              "Pomme",
+              "Mayonnaise",
               "Carotte",
-              "Raisins",
-              "Sauce sucrée / crémeuse"
+              "Raisins sec",
+              "Citron"
             ],
-            "memo": "🥬 Accompagnement froid type salade de chou, carotte et raisins, avec une sauce sucrée/crémeuse selon recette. En cas d’allergie, vérifier la fiche officielle avant de répondre."
+            "memo": "🥬 Accompagnement froid type salade de chou, carotte, pomme, citron, mayonnaise et raisins sec. En cas d’allergie, vérifier la fiche officielle avant de répondre."
           },
           {
             "name": "4. Mesclun et vinaigrette aux agrumes",
