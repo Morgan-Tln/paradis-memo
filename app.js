@@ -1332,7 +1332,7 @@
         "Client : “Je veux commander vite, conseillez-moi un combo cohérent.”",
         "⚡",
         "Moyen",
-        "Réponse serveur : proposer une logique en 4 choix clairs.\nCombo léger : Le Veggie + Mangue Énergie, frais et lisible.\nCombo rapide : Fish & Chips + Grand Soleil, simple à expliquer et efficace.\nCombo star : Goody Woody + Joséphine Baker, gourmand salé + tropical sans alcool.\nCombo gourmand : Deli Mix Pastrami + Pink Spritz + Chocolat Mon Amour, pour grosse faim et plaisir.",
+        "Réponse serveur : proposer une logique en 4 choix clairs.\nCombo léger : Le Veggie + Mangue Énergie, frais et lisible.\nCombo rapide : Fish & Chips + Grand Soleil, simple à expliquer et efficace.\nCombo star : Goody Woody + Joséphine Baker et un magnifique dessert.\nCombo gourmand : Deli Mix / Paradis du paradis + Pink Spritz + Chocolat Mon Amour.",
         [
           "Toujours demander : léger, rapide, star ou gourmand ?",
           "Associer un plat riche avec une boisson fraîche/fruitée.",

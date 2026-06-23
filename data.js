@@ -668,7 +668,7 @@ window.SECTIONS = {
         "emoji": "🥙",
         "items": [
           {
-            "name": "Liste réglementaire des côtés",
+            "name": "Liste des accompagnements",
             "ingredients": [
               "Pommes frites",
               "Riz vapeur aux petits légumes",
@@ -816,7 +816,7 @@ window.SECTIONS = {
               "Basilic",
               "Tige de céleri"
             ],
-            "memo": "🍏 Accompagné d'une tige de céleri selon la note 3 de la carte."
+            "memo": "🍏 Accompagné d'une tige de céleri."
           },
           {
             "name": "Apple Bunny 40cl",
@@ -1459,7 +1459,7 @@ window.SECTIONS = {
             "ingredients": [
               "Café",
               "Lait",
-              "Crème fouettée selon version"
+              "Crème fouettée"
             ],
             "memo": "☕ Boisson lactée."
           },
