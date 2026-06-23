@@ -1251,9 +1251,9 @@
         "Client : “C'est quoi le coleslaw ?”",
         "🥬",
         "Moyen",
-        "Réponse serveur : expliquer simplement que c'est un accompagnement froid type salade de chou, carotte et raisins, avec une sauce plutôt sucrée/crémeuse. Si le client parle d'allergie ou d'intolérance, on vérifie la fiche officielle.",
+        "Réponse serveur : expliquer simplement que c'est un accompagnement froid type salade de chou, carotte, pomme et raisins, avec une sauce plutôt sucrée/crémeuse. Si le client parle d'allergie ou d'intolérance, on vérifie la fiche officielle.",
         [
-          "Réponse simple : salade froide chou + carotte + raisins + sauce sucrée/crémeuse.",
+          "Réponse simple : salade froide chou + carotte + raisins + pomme + sauce sucrée/crémeuse.",
           "Réponse allergie : ne jamais garantir sans fiche officielle.",
           "Il accompagne notamment Deli Mix Pastrami, Sir Homard Lobster et Paradis du Paradis."
         ],
