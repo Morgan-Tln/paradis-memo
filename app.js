@@ -702,29 +702,51 @@
 
   function buildManualQuestions(items, onlyWeak) {
     if (onlyWeak) return [];
+
     const findOne = (terms) => items.find((item) => containsAny(item, terms)) || items[0];
     const refs = {
       thon: findOne(["tartinade de thon"]),
       fish: findOne(["fish chips merlu"]),
       miniFish: findOne(["mini fish chips limande"]),
       bulle: findOne(["dans ta bulle", "bulle citron jaune"]),
-      formule: findOne(["adam eve", "paradis terrestre", "paradis celeste"]),
+      adam: findOne(["adam eve"]),
+      terrestre: findOne(["paradis terrestre"]),
+      celeste: findOne(["paradis celeste"]),
+      paradisParadis: findOne(["paradis du paradis", "plateau geant"]),
       fondant: findOne(["fondant coeur coulant"]),
       detox: findOne(["veggie detox"]),
       pommeBio: findOne(["pomme bio"]),
       coleslaw: findOne(["coleslaw"]),
       spritz: findOne(["spritz original"]),
-      composer: findOne(["yoyo a composer", "vegan a composer"])
+      composer: findOne(["yoyo a composer", "vegan a composer"]),
+      caesar: findOne(["caesar au paradis"]),
+      banquise: findOne(["banquise sauvage"]),
+      hugo: findOne(["hugo spritz"]),
+      fragola: findOne(["fragola"]),
+      goody: findOne(["goody woody"]),
+      josephine: findOne(["josephine baker"]),
+      chutney: findOne(["chutney de tomates"]),
+      veggieBurger: findOne(["veggie burger"]),
+      dolce: findOne(["dolce paradisio"])
     };
 
     return [
       question(
-        "manual__fish_chips_difference",
+        "manual__fish_chips_poisson",
         "Pièges carte",
         "Comparaison",
         "Difficile",
-        "Différence à connaître : Fish & Chips plat vs Mini Fish & Chips des assiettes ?",
-        "Fish & Chips en plat = merlu du Cap croustillant, frites, mesclun et sauce tartare. Mini Fish & Chips des assiettes = limande avec sauce tartare.",
+        "Deux versions de Fish & Chips existent sur la carte. Quelle différence dois-tu connaître ?",
+        "Le Fish & Chips en plat utilise du merlu du Cap croustillant avec frites, mesclun et sauce tartare. Le Mini Fish & Chips des assiettes à composer utilise de la limande avec sauce tartare.",
+        refs.fish && refs.fish.id
+      ),
+      question(
+        "manual__fish_chips_lactose",
+        "Allergènes",
+        "Vigilance service",
+        "Difficile",
+        "Pour le Fish & Chips, quel allergène moins évident dois-tu aussi vérifier en plus du poisson et du gluten possible ?",
+        "Lait / lactose. Réflexe pro : ne pas garantir à l'oral sans vérifier la fiche allergènes officielle et/ou la cuisine.",
         refs.fish && refs.fish.id
       ),
       question(
@@ -732,17 +754,35 @@
         "Pièges allergènes",
         "Réflexe service",
         "Difficile",
-        "Un client allergique au céleri veut une tartinade de thon : quel piège dois-tu avoir en tête ?",
-        "La tartinade de thon contient du céleri et du poivron, avec du thon Listao. Réflexe pro : ne pas improviser, vérifier la liste officielle des allergènes.",
+        "Un client allergique au céleri hésite sur une préparation au thon. Quel réflexe dois-tu avoir ?",
+        "Vérifier la tartinade de thon : elle contient du céleri et du poivron, avec thon Listao. Ne jamais improviser en cas d'allergie.",
         refs.thon && refs.thon.id
+      ),
+      question(
+        "manual__caesar_poisson_cache",
+        "Allergènes",
+        "Vigilance sauce",
+        "Difficile",
+        "Quel allergène peut être moins évident dans une salade Caesar, même si le nom du plat ne le montre pas ?",
+        "Poissons, à cause de la sauce Caesar qui peut contenir de l'anchois selon la recette. Réflexe : vérifier la liste officielle.",
+        refs.caesar && refs.caesar.id
+      ),
+      question(
+        "manual__banquise_oeuf",
+        "Allergènes",
+        "Composition",
+        "Moyen",
+        "Dans un toast chaud au saumon avec tartinade à l'aneth, quel ingrédient ajoute une vigilance œuf ?",
+        "L'œuf poché de la Banquise Sauvage. À retenir aussi : saumon/tartinade de saumon, pousses d'épinard et pommes frites.",
+        refs.banquise && refs.banquise.id
       ),
       question(
         "manual__pomme_bio_celeri",
         "Boissons",
         "Piège garniture",
         "Moyen",
-        "Quels cocktails avec pomme Bio ont un détail de service à ne pas oublier ?",
-        "Double Force, Apple Bunny, Tornade Santé, Green Attitude et Super Green contiennent de la pomme Bio et sont accompagnés d'une tige de céleri.",
+        "Certains jus à base de pomme Bio ont un détail de service à ne pas oublier. Lequel ?",
+        "Ils sont accompagnés d'une tige de céleri. Produits concernés : Double Force, Apple Bunny, Tornade Santé, Green Attitude et Super Green.",
         refs.pommeBio && refs.pommeBio.id
       ),
       question(
@@ -750,8 +790,8 @@
         "Boissons",
         "Piège composition",
         "Moyen",
-        "Pourquoi le Veggie Detox n'est pas à présenter comme complètement “sans sucre” ?",
-        "Il contient concombre, kale, menthe et jus aloe vera. Le piège : présence de sucre dans le jus aloe vera.",
+        "Quelle boisson verte ne doit pas être présentée comme totalement sans sucre, et pourquoi ?",
+        "Le Veggie Detox, car il contient du jus aloe vera avec présence de sucre. Composition : concombre, kale, menthe, jus aloe vera.",
         refs.detox && refs.detox.id
       ),
       question(
@@ -759,8 +799,8 @@
         "Desserts",
         "Allergène",
         "Moyen",
-        "Quel dessert de la carte est explicitement indiqué sans gluten ?",
-        "Le Fondant Cœur Coulant : fondant au chocolat sans gluten, accompagné de crème anglaise et crème fouettée. Attention : vérifier quand même la procédure cuisine en cas d'allergie sévère.",
+        "Un client cherche un dessert indiqué sans gluten sur la carte. Que peux-tu citer en priorité ?",
+        "Le Fondant Cœur Coulant : fondant au chocolat sans gluten avec crème anglaise et crème fouettée. En cas d'allergie sévère, vérifier la procédure officielle.",
         refs.fondant && refs.fondant.id
       ),
       question(
@@ -768,26 +808,26 @@
         "Assiettes à composer",
         "Formule",
         "Facile",
-        "Combien de saveurs dans Adam & Eve, Paradis Terrestre et Paradis Céleste ?",
-        "Adam & Eve = 2 saveurs + 1 accompagnement. Paradis Terrestre = 3 saveurs + 1 accompagnement. Paradis Céleste = 4 saveurs + 1 accompagnement. Paradis du Paradis = plateau géant de 8 saveurs avec frites et coleslaw, idéal à partager.",
-        refs.formule && refs.formule.id
+        "Comment résumer les quatre formats d'assiettes à composer ?",
+        "Adam & Eve = 2 saveurs + 1 accompagnement. Paradis Terrestre = 3 saveurs + 1 accompagnement. Paradis Céleste = 4 saveurs + 1 accompagnement. Paradis du Paradis = 8 saveurs avec frites et coleslaw, idéal pour 2.",
+        refs.paradisParadis && refs.paradisParadis.id
       ),
       question(
         "manual__formule_midi",
         "Assiettes à composer",
         "Service",
         "Moyen",
-        "Quand s'appliquent les formules midi des assiettes à composer ?",
-        "De 11h30 à 15h00, du lundi au vendredi, hors jours fériés. Elles ajoutent “Choisis ta bulle” selon la formule concernée.",
-        refs.formule && refs.formule.id
+        "À quel moment les formules midi des assiettes à composer s'appliquent-elles ?",
+        "De 11h30 à 15h00, du lundi au vendredi, hors jours fériés. Les formules concernées ajoutent aussi “Choisis ta bulle”.",
+        refs.adam && refs.adam.id
       ),
       question(
         "manual__dans_ta_bulle",
         "Boissons",
-        "Composition",
+        "Explication client",
         "Moyen",
-        "C'est quoi “Dans ta Bulle XXL” ?",
-        "Une boisson XXL de 45cl à base de tonic, avec une touche d'amertume. Choix : citron jaune, concombre, orange fraîchement pressée, ananas-verveine ou framboise-cranberry-hibiscus.",
+        "Un client demande ce qu'est “Dans ta Bulle XXL”. Comment l'expliquer simplement ?",
+        "C'est une boisson XXL de 45cl à base de tonic avec une touche d'amertume. Choix : citron jaune, concombre, orange fraîchement pressée, ananas-verveine ou framboise-cranberry-hibiscus.",
         refs.bulle && refs.bulle.id
       ),
       question(
@@ -795,8 +835,8 @@
         "Boissons",
         "Structure",
         "Moyen",
-        "Comment expliquer les Cocktails à Composer ?",
-        "Le client choisit une base : Yoyo, Fruit, Milk ou Vegan, puis 1 ou 2 parfums parmi la liste. Le fruit supplémentaire est une option.",
+        "Comment fonctionne la famille des Cocktails à Composer ?",
+        "Le client choisit une base : Yoyo, Fruit, Milk ou Vegan, puis 1 ou 2 parfums dans la liste. Un fruit supplémentaire peut être ajouté.",
         refs.composer && refs.composer.id
       ),
       question(
@@ -804,8 +844,8 @@
         "Boissons",
         "Promesse carte",
         "Facile",
-        "Quelle est la promesse des Pressés Minute ?",
-        "Fruits pressés à la demande, sans sucre ajouté. Exception à ne pas confondre : le Citron Pressé est servi avec eau et sucre en poudre.",
+        "Quelle différence faut-il faire entre les Pressés Minute et le Citron Pressé ?",
+        "Les Pressés Minute sont des fruits pressés à la demande, sans sucre ajouté. Le Citron Pressé est servi avec eau et sucre en poudre.",
         refs.pommeBio && refs.pommeBio.id
       ),
       question(
@@ -813,20 +853,171 @@
         "Mixologie",
         "Alcools",
         "Difficile",
-        "Associe les grandes familles d'alcools : Margarita, Daiquiri, Mojito, Pina Colada, Spritz, Basilic Instinct.",
-        "Margarita = tequila Camino Real. Daiquiri, Mojito et Pina Colada = rhum Bacardi Carta Oro. Spritz = Apérol/Prosecco ou St-Germain/Prosecco pour Hugo. Basilic Instinct = gin Bombay Sapphire.",
+        "Quelles bases d'alcool retenir pour les grandes familles de cocktails ?",
+        "Margarita = tequila Camino Real. Daiquiri, Mojito et Pina Colada = rhum Bacardi Carta Oro. Spritz = Apérol/Prosecco, sauf Hugo avec St-Germain/Prosecco. Basilic Instinct = gin Bombay Sapphire.",
         refs.spritz && refs.spritz.id
+      ),
+      question(
+        "manual__cocktail_fruite_alcool",
+        "Mixologie",
+        "Conseil client",
+        "Moyen",
+        "Un client veut un cocktail alcoolisé fruité. Quelles propositions cohérentes peux-tu donner ?",
+        "Pink Spritz, Passion Spritz, Hugo Spritz, Mojito Fruit, Pina Colada La Fragola, Margarita Mangue, Danse Joséphine ou Daiquiri Passion & Framboise.",
+        refs.hugo && refs.hugo.id
       ),
       question(
         "manual__coleslaw",
         "Vocabulaire carte",
         "Service client",
         "Moyen",
-        "Un client demande : “C'est quoi le coleslaw ?” Que répondre simplement ?",
-        "C'est un accompagnement froid type salade de chou, carotte, mayonnaise, citron et raisins sec. Pour une allergie, ne jamais garantir : vérifier la fiche officielle.",
+        "Un client demande ce qu'est le coleslaw. Quelle réponse simple donner ?",
+        "C'est un accompagnement froid type salade de chou et carotte, avec raisins et sauce sucrée/crémeuse. Pour une allergie, vérifier la fiche officielle.",
         refs.coleslaw && refs.coleslaw.id
+      ),
+      question(
+        "manual__chutney_tomate",
+        "Vocabulaire carte",
+        "Service client",
+        "Facile",
+        "Comment expliquer un chutney de tomate à un client ?",
+        "C'est une compotée/condiment de tomate, légèrement sucré-acidulé, plus parfumé qu'une sauce tomate classique.",
+        refs.chutney && refs.chutney.id
+      ),
+      question(
+        "manual__combo_rapide",
+        "Service client",
+        "Conseil",
+        "Moyen",
+        "Un client veut commander vite. Quelle logique de conseil peux-tu utiliser ?",
+        "Proposer une logique claire : léger = salade ou avocado toast + boisson fraîche ; rapide/gourmand = toast chaud type Goody Woody ; star fruitée = Joséphine Baker ou Mangue Énergie ; dessert gourmand = gaufre, pancake ou dessert chocolaté selon faim.",
+        refs.goody && refs.goody.id
+      ),
+      question(
+        "manual__vegetarien_vrai_plat",
+        "Service client",
+        "Conseil",
+        "Moyen",
+        "Un client végétarien veut un vrai plat, pas seulement une salade. Que peux-tu proposer ?",
+        "Le Veggie Burger, Dolce Paradisio, Pistou Presto, Le Veggie en avocado toast, Tutti Salata, ou des pitas/fromages sans viande ni poisson selon disponibilité.",
+        refs.veggieBurger && refs.veggieBurger.id
+      ),
+      question(
+        "manual__vegan_prudence",
+        "Service client",
+        "Vigilance",
+        "Difficile",
+        "Pourquoi faut-il être prudent quand un client demande une option vegan ?",
+        "Beaucoup d'options veggie contiennent fromage, œuf, crème, miel ou sauce non vegan. Proposer plutôt boissons fruitées/vegan à composer, puis vérifier précisément chaque plat en cuisine.",
+        refs.composer && refs.composer.id
       )
     ];
+  }
+
+  function hasObviousAllergenInName(item, allergens) {
+    const name = normalizeText(item.name || "");
+    const checks = [
+      { allergen: "Poissons", words: ["thon", "saumon", "fish", "merlu", "limande", "poisson"] },
+      { allergen: "Crustacés", words: ["crevette", "homard", "lobster"] },
+      { allergen: "Œufs", words: ["oeuf", "brouillade", "pancake", "gaufre", "profiterole", "meringue"] },
+      { allergen: "Lait / lactose", words: ["cheddar", "chevre", "mozzarella", "burrata", "feta", "cheese", "lait", "latte", "cappuccino", "glace", "yolita", "yaourt", "cream"] },
+      { allergen: "Fruits à coque", words: ["noix", "amande", "pistache", "praline", "noisette", "nutella", "nougat"] },
+      { allergen: "Gluten possible", words: ["pita", "focaccia", "toast", "burger", "pain", "gaufre", "pancake", "tarte", "cheesecake", "gateau"] }
+    ];
+
+    return checks.some((entry) =>
+      allergens.includes(entry.allergen) &&
+      entry.words.some((word) => name.includes(normalizeText(word)))
+    );
+  }
+
+  function ingredientLooksGivenInName(itemName, ingredient) {
+    const name = normalizeText(itemName);
+    const text = normalizeText(ingredient);
+    const stopWords = new Set([
+      "avec", "dans", "pour", "facon", "paradis", "fruit", "fruits", "saveur", "mini",
+      "pita", "toastee", "toast", "toasts", "sauce", "cremeux", "cremeuse", "creme",
+      "fior", "latte", "aop", "chaud", "chaude", "frais", "fraiche", "fraiches", "des", "aux"
+    ]);
+
+    return text
+      .split(" ")
+      .filter((word) => word.length >= 4 && !stopWords.has(word))
+      .some((word) => name.includes(word));
+  }
+
+  function ingredientLeakCount(item, ingredients) {
+    return ingredients.filter((ingredient) => ingredientLooksGivenInName(item.name || "", ingredient)).length;
+  }
+
+  function makeCompositionQuiz(item, ingredients) {
+    const name = cleanItemName(item.name);
+    const normalized = normalizeText(name);
+
+    const make = (label, questionText, answerParts) => ({
+      label,
+      questionText,
+      answer: answerParts.filter(Boolean).join(" · ")
+    });
+
+    if (normalized.includes("pita toastee") && normalized.includes("chevre")) {
+      return make(
+        "Pita toastée Chèvre",
+        "Tu dois préparer ou annoncer “Pita toastée Chèvre”. Quels éléments principaux retenir en plus du chèvre ?",
+        ingredients.filter((ingredient) => !containsAnyText(ingredient, ["pita toastee", "chevre"]))
+      );
+    }
+
+    if (normalized.includes("pita toastee") && normalized.includes("thon")) {
+      return make(
+        "Pita toastée Thon",
+        "Tu dois préparer ou annoncer “Pita toastée Thon”. Quels éléments principaux retenir avec le thon ?",
+        ingredients.filter((ingredient) => !containsAnyText(ingredient, ["pita toastee"]))
+      );
+    }
+
+    if (normalized.includes("pita toastee") && normalized.includes("dinde")) {
+      return make(
+        "Pita toastée Dinde",
+        "Tu dois préparer ou annoncer “Pita toastée Dinde”. Quels éléments principaux retenir avec la dinde ?",
+        ingredients.filter((ingredient) => !containsAnyText(ingredient, ["pita toastee", "dinde"]))
+      );
+    }
+
+    if (normalized.includes("pita toastee") && normalized.includes("poulet")) {
+      return make(
+        "Pita toastée Poulet Curry",
+        "Tu dois préparer ou annoncer “Pita toastée Poulet Curry”. Quels éléments principaux retenir en plus du poulet curry ?",
+        ingredients.filter((ingredient) => !containsAnyText(ingredient, ["pita toastee", "poulet miel curry", "poulet"])))
+      ;
+    }
+
+    if (normalized.includes("pita toastee") && (normalized.includes("mozza") || normalized.includes("mozzarella"))) {
+      return make(
+        "Pita toastée Mozza",
+        "Tu dois préparer ou annoncer “Pita toastée Mozza”. Quels éléments principaux retenir en plus de la mozzarella ?",
+        ingredients.filter((ingredient) => !containsAnyText(ingredient, ["pita toastee", "mozzarella"])))
+      ;
+    }
+
+    if (normalized.includes("pita toastee") && normalized.includes("saumon")) {
+      return make(
+        "Pita toastée Saumon",
+        "Tu dois préparer ou annoncer “Pita toastée Saumon”. Quels éléments principaux retenir avec le saumon ?",
+        ingredients.filter((ingredient) => !containsAnyText(ingredient, ["pita toastee", "saumon fume"])))
+      ;
+    }
+
+    const leakCount = ingredientLeakCount(item, ingredients);
+    if (ingredients.length <= 4 && leakCount >= Math.max(2, ingredients.length - 1)) {
+      return null;
+    }
+
+    return make(
+      name,
+      `Tu dois préparer ou annoncer “${name}”. Quels éléments principaux dois-tu retenir ?`,
+      ingredients
+    );
   }
 
   function buildDynamicQuestions(items, onlyWeak = false) {
@@ -836,53 +1027,55 @@
 
     eligible.forEach((item) => {
       const ingredients = compactIngredients(item, 8);
+
       if (ingredients.length >= 3) {
-        bank.push(question(
-          `composition__${item.id}`,
-          item.categoryLabel,
-          "Composition",
-          ingredients.length >= 6 ? "Difficile" : "Moyen",
-          `Donne la composition utile de “${cleanItemName(item.name)}”.`,
-          ingredients.join(" · "),
-          item.id
-        ));
+        const compositionQuiz = makeCompositionQuiz(item, ingredients);
+        if (compositionQuiz && compositionQuiz.answer) {
+          bank.push(question(
+            `composition__${item.id}`,
+            item.categoryLabel,
+            "Composition",
+            ingredients.length >= 6 ? "Difficile" : "Moyen",
+            compositionQuiz.questionText,
+            compositionQuiz.answer,
+            item.id
+          ));
+        }
       }
 
-      const reverse = compactIngredients(item, 4);
-      if (reverse.length >= 3 && !containsAnyText(item.name, ["original", "l'original"])) {
-        bank.push(question(
-          `reverse__${item.id}`,
-          item.categoryLabel,
-          "Reconnaissance",
-          "Moyen",
-          `Quel produit correspond à : ${reverse.join(" · ")} ?`,
-          `${cleanItemName(item.name)} (${item.categoryLabel})`,
-          item.id
-        ));
-      }
+      const traps = getTrapNotes(item).filter((note) => !containsAnyText(note, [
+        "alcool rhum",
+        "alcool tequila",
+        "alcool gin",
+        "rhum bacardi",
+        "tequila camino",
+        "gin bombay"
+      ]));
 
-      const traps = getTrapNotes(item);
       if (traps.length) {
         bank.push(question(
           `trap__${item.id}`,
           item.categoryLabel,
-          "Piège",
+          "Point de vigilance",
           "Difficile",
-          `Quel piège ou détail de service retenir pour “${cleanItemName(item.name)}” ?`,
+          `À quoi faire attention avec “${cleanItemName(item.name)}” ?`,
           traps.join(" · "),
           item.id
         ));
       }
 
       const allergens = getRevisionAllergens(item);
-      if (allergens.length >= 2 && !containsAnyText(item.name, ["liste", "supplement", "parfums"])) {
+      const hiddenAllergens = allergens.filter((allergen) => !hasObviousAllergenInName(item, [allergen]));
+      const skipManualAllergen = containsAnyText(item.name, ["fish chips", "caesar au paradis", "banquise sauvage"]);
+
+      if (!skipManualAllergen && hiddenAllergens.length >= 1 && allergens.length >= 2 && !containsAnyText(item.name, ["liste", "supplement", "parfums", "au choix"])) {
         bank.push(question(
           `allergens__${item.id}`,
           item.categoryLabel,
           "Vigilance allergènes",
           "Difficile",
-          `Quels allergènes indicatifs dois-tu vérifier pour “${cleanItemName(item.name)}” ?`,
-          `${allergens.join(" · ")}. Réflexe : confirmer avec la liste officielle et/ou la cuisine.`,
+          `Pour “${cleanItemName(item.name)}”, quelle vigilance allergène peut facilement être oubliée ?`,
+          `${hiddenAllergens.join(" · ")}. Toujours confirmer avec la liste officielle et/ou la cuisine.`,
           item.id
         ));
       }
@@ -891,13 +1084,14 @@
         const alcohols = (item.ingredients || []).filter((ingredient) => containsAnyText(ingredient, [
           "rhum", "tequila", "gin", "aperol", "prosecco", "martini", "st-germain", "biere", "cidre", "vin"
         ]));
+
         if (alcohols.length) {
           bank.push(question(
             `alcohol__${item.id}`,
             item.categoryLabel,
             "Alcool",
             "Moyen",
-            `Quel alcool contient “${cleanItemName(item.name)}” ?`,
+            `Quelle base alcoolisée dois-tu retenir pour “${cleanItemName(item.name)}” ?`,
             alcohols.join(" · "),
             item.id
           ));
@@ -910,51 +1104,96 @@
 
   function buildKeywordQuestions(items, onlyWeak = false) {
     if (onlyWeak) return [];
+
     const cases = [
       {
         id: "keyword__gravlax",
         category: "Sauces",
         type: "Association",
         difficulty: "Moyen",
-        term: "gravlax",
-        q: "Quels produits de la carte sont associés à la sauce gravlax ?"
+        terms: ["gravlax"],
+        q: "Où retrouve-t-on la sauce gravlax ?"
       },
       {
         id: "keyword__pistou",
         category: "Sauces",
         type: "Association",
         difficulty: "Moyen",
-        term: "pistou",
-        q: "Quels produits contiennent du pistou ?"
+        terms: ["pistou"],
+        q: "Dans quelles fiches dois-tu penser au pistou ?"
       },
       {
         id: "keyword__cheddar",
         category: "Fromage",
         type: "Association",
         difficulty: "Moyen",
-        term: "cheddar",
-        q: "Cite des produits où le Cheddar apparaît."
+        terms: ["cheddar"],
+        q: "Sur quelles préparations le Cheddar apparaît-il ?"
       },
       {
         id: "keyword__sweet_chili",
         category: "Sauces",
         type: "Association",
         difficulty: "Difficile",
-        term: "sweet chili",
-        q: "Quelle saveur utilise la sauce sweet chili ?"
+        terms: ["sweet chili"],
+        q: "Quelle saveur d'assiette à composer est associée à la sauce sweet chili ?"
       },
       {
         id: "keyword__tom_yum",
         category: "Marmites",
         type: "Association",
         difficulty: "Difficile",
-        term: "tom yum",
-        q: "Quelle marmite contient la sauce tom yum ?"
+        terms: ["tom yum"],
+        q: "Quelle marmite dois-tu associer à la sauce tom yum ?"
+      },
+      {
+        id: "keyword__aneth",
+        category: "Herbes",
+        type: "Association",
+        difficulty: "Moyen",
+        terms: ["aneth"],
+        q: "Quelles préparations sont liées à l'aneth ?"
+      },
+      {
+        id: "keyword__chutney",
+        category: "Condiments",
+        type: "Association",
+        difficulty: "Moyen",
+        terms: ["chutney de tomates"],
+        q: "Où retrouve-t-on le chutney de tomates ?"
+      },
+      {
+        id: "keyword__spicy_mayo",
+        category: "Sauces",
+        type: "Association",
+        difficulty: "Moyen",
+        terms: ["spicy mayo"],
+        q: "Sur quelles saveurs apparaît la sauce spicy mayo ?"
+      },
+      {
+        id: "keyword__sauce_tartare",
+        category: "Sauces",
+        type: "Association",
+        difficulty: "Moyen",
+        terms: ["sauce tartare"],
+        q: "Quelles fiches sont associées à la sauce tartare ?"
+      },
+      {
+        id: "keyword__grana",
+        category: "Fromage",
+        type: "Association",
+        difficulty: "Moyen",
+        terms: ["grana padano"],
+        q: "Dans quelles fiches retrouve-t-on le Grana Padano AOP ?"
       }
     ];
 
     return cases.map((entry) => {
-      const matches = items.filter((item) => has(item, entry.term)).slice(0, 8);
+      const matches = items
+        .filter((item) => entry.terms.some((term) => has(item, term)))
+        .filter((item) => !isUtilityQuizItem(item))
+        .slice(0, 8);
+
       return question(
         entry.id,
         entry.category,
@@ -971,7 +1210,18 @@
     const dynamic = buildDynamicQuestions(items, onlyWeak);
     const manual = buildManualQuestions(items, onlyWeak);
     const keyword = buildKeywordQuestions(items, onlyWeak);
-    const bank = [...manual, ...keyword, ...dynamic];
+
+    const bank = [...manual, ...keyword, ...dynamic].filter((entry) => {
+      if (!entry || !entry.question || !entry.answer) return false;
+      const q = normalizeText(entry.question);
+      const a = normalizeText(entry.answer);
+      if (!q || !a) return false;
+
+      // Évite les questions inutiles où la réponse complète est déjà contenue dans l'énoncé.
+      if (a.length > 18 && q.includes(a)) return false;
+
+      return true;
+    });
 
     const uniqueByQuestion = [];
     const seen = new Set();
