@@ -1088,7 +1088,7 @@
 
     return [
       scenario(
-        "Client : “Je suis végétarien, je veux un vrai plat, pas juste une salade triste.”",
+        "Client : “Je suis végétarien, je veux un vrai plat, pas juste une salade.”",
         "🌱",
         "Moyen",
         "Réponse serveur : proposer d'abord Le Veggie, Veggie Burger, Pistou Presto, Dolce Paradisio, Tutti Salata ou les pitas/fromages sans viande. Préciser que végétarien ne veut pas dire vegan : beaucoup d'options contiennent fromage, œufs ou crème.",
