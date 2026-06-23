@@ -993,10 +993,10 @@
           <div class="view-title">
             <div>
               <div class="eyebrow">Quiz renforcé</div>
-              <h2 class="h2">Interrogation utile, pas récitation bête</h2>
+              <h2 class="h2">Teste tes connaissances</h2>
             </div>
           </div>
-          <p class="muted">Le quiz évite maintenant les questions creuses du type “2 parfums au choix”. Il mélange compositions, pièges, allergènes indicatifs, alcools, formules et reconnaissance d'ingrédients.</p>
+          <p class="muted">Le quiz mélange compositions, pièges, allergènes indicatifs, alcools, formules et reconnaissance d'ingrédients.</p>
           <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:14px">
             <button class="action-btn primary" data-quiz="all">Quiz complet</button>
             <button class="action-btn review" data-quiz="weak">Mes erreurs (${weakCount})</button>
