@@ -1,5 +1,5 @@
 // Base de données complète enrichie depuis la carte PDF - Le Paradis du Fruit
-// Version v7 : conservation de l'existant + ajout des produits manquants des pages 2 à 7.
+// Version v13 : données de révision alignées avec la carte PDF, quiz renforcé et allergènes non officiels côté application.
 window.SECTIONS = {
   "plats": {
     "label": "🍽️ Les Plats",
@@ -698,9 +698,12 @@ window.SECTIONS = {
           {
             "name": "3. Coleslaw",
             "ingredients": [
-              "Coleslaw"
+              "Chou",
+              "Carotte",
+              "Raisins",
+              "Sauce sucrée / crémeuse"
             ],
-            "memo": "🥬 Accompagnement froid."
+            "memo": "🥬 Accompagnement froid type salade de chou, carotte et raisins, avec une sauce sucrée/crémeuse selon recette. En cas d’allergie, vérifier la fiche officielle avant de répondre."
           },
           {
             "name": "4. Mesclun et vinaigrette aux agrumes",
@@ -2046,7 +2049,7 @@ window.SECTIONS = {
   }
 };
 
-window.OFFICIAL_ALLERGENS = [
+window.REVISION_ALLERGENS = [
   { id: "gluten", name: "Céréales contenant du gluten", desc: "Blé, seigle, orge, avoine, épeautre (Pitas, Focaccia, Blinis, Choux, Panures)", color: { bg: "#faf6f0", text: "#6b4423", border: "#e8dcad" } },
   { id: "crustaces", name: "Crustacés", desc: "Crevettes, homard, crabe", color: { bg: "#ffe4e6", text: "#9f1239", border: "#fecdd3" } },
   { id: "oeufs", name: "Œufs", desc: "Œufs pochés, durs, mayonnaise maison, sauces Tartare et Caesar", color: { bg: "#fef9c3", text: "#713f12", border: "#fef08a" } },
