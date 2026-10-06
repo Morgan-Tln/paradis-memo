@@ -96,6 +96,16 @@ function pageVars(route, items) {
   return "";
 }
 
+// Le navigateur ne doit pas recaler le scroll tout seul au changement de page.
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+function scrollPageTo(y) {
+  const top = y || 0;
+  window.scrollTo(0, top);
+  document.documentElement.scrollTop = top;
+  document.body.scrollTop = top;
+}
+
 function onRouteChange() {
   const newHash = location.hash || "#/";
   const cameFromItem = previousRoute && previousRoute.view === "fiche";
@@ -106,8 +116,11 @@ function onRouteChange() {
   state.filterDraft = null;
   render();
 
+  // En revenant d'une fiche, on retrouve la liste. Sinon, toujours en haut.
   const restore = cameFromItem && scrollMemory[newHash] !== undefined;
-  window.scrollTo(0, restore ? scrollMemory[newHash] : 0);
+  const y = restore ? scrollMemory[newHash] : 0;
+  scrollPageTo(y);
+  requestAnimationFrame(() => scrollPageTo(y));
 
   previousRoute = state.route;
   previousHash = newHash;

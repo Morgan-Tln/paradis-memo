@@ -80,7 +80,6 @@ function bindEvents() {
     const groupBtn = target.closest("[data-group]");
     const statusBtn = target.closest("[data-status]");
     const card = target.closest("[data-open]");
-    const navLink = target.closest(".drawer a[href]");
     const searchBtn = target.closest("[data-search]");
     const quizBtn = target.closest("[data-quiz]");
     const quizMenuBtn = target.closest("[data-quiz-menu]");
@@ -167,10 +166,14 @@ function bindEvents() {
       return;
     }
 
-    // Un lien du menu vers la page déjà affichée : on referme simplement le menu.
-    if (navLink && navLink.getAttribute("href") === (location.hash || "#/")) {
+    // Liens internes : on empêche le navigateur de garder le scroll de la page précédente.
+    const hashLink = target.closest("a[href^='#']");
+    if (hashLink) {
+      const href = hashLink.getAttribute("href") || "#/";
       event.preventDefault();
-      return setMenu(false);
+      if (href === (location.hash || "#/")) return setMenu(false);
+      location.hash = href;
+      return;
     }
 
     // ✕ / ✓ : un 2e appui sur le même bouton remet la fiche à « nouvelle ».
@@ -197,6 +200,7 @@ function bindEvents() {
       state.quiz = null;
       saveJson(QUIZ_KEY, null);
       render();
+      scrollPageTo(0);
       return;
     }
 

@@ -225,7 +225,7 @@ function startQuiz(scope, items) {
   state.quiz = { scope, questions, index: 0, ok: 0, nok: 0, pending: null };
   saveJson(QUIZ_KEY, state.quiz);
   render();
-  window.scrollTo(0, 0);
+  scrollPageTo(0);
 }
 
 /*
@@ -268,5 +268,5 @@ function nextQuiz() {
 
   saveJson(QUIZ_KEY, quiz);
   render();
-  window.scrollTo(0, 0);
+  scrollPageTo(0);
 }
