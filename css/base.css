@@ -136,6 +136,15 @@ h3 {
   margin-bottom: 22px;
 }
 
+/* Accueil, Quizz, Entraînement : pas de bouton retour.
+   On réserve la hauteur du menu pour que le titre ne passe pas dessous. */
+.view-accueil .back-row,
+.view-quiz .back-row,
+.view-entrainement .back-row {
+  min-height: 46px;
+  margin-bottom: 12px;
+}
+
 .back-row .back-link {
   margin-bottom: 0;
 }

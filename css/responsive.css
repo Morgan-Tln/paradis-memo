@@ -93,7 +93,7 @@
   }
 
   .tile-title {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .tile-meta {
@@ -134,6 +134,7 @@
   .seg {
     flex: 1;
     padding: 4px 8px;
+    font-size: 13px;
   }
 
 
@@ -154,7 +155,7 @@
   }
 
   .card-title {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .status-btn {
@@ -225,6 +226,212 @@
   .quiz-general-label .score-ring-label {
     font-size: 19px;
   }
+
+  /* Titres un peu moins imposants, toujours sous le menu */
+  .logo-paradis {
+    font-size: clamp(44px, 12.5vw, 72px);
+  }
+
+  .logo-fruit {
+    font-size: clamp(32px, 9vw, 52px);
+  }
+
+  .quiz-logo {
+    font-size: clamp(44px, 12.5vw, 72px);
+  }
+
+  .page-title {
+    font-size: clamp(28px, 8vw, 42px);
+  }
+
+  .lead {
+    font-size: 14px;
+  }
+
+  .block-title {
+    margin: 22px 0 10px;
+    font-size: 19px;
+  }
+
+  /* Recherche accueil : champ plus compact, texte plus petit */
+  .search-box {
+    margin-top: 28px;
+  }
+
+  .search-field {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .input {
+    height: 44px;
+    font-size: 14px;
+    text-overflow: ellipsis;
+  }
+
+  .input::placeholder {
+    font-size: 12.5px;
+  }
+
+  .filters-btn {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+
+  .ingredient.small {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  /* Modale filtres */
+  .modal {
+    width: min(560px, calc(100% - 16px));
+    max-height: min(88vh, 680px);
+    border-radius: 18px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .modal-head {
+    padding: 14px 14px 8px 16px;
+  }
+
+  .modal-body {
+    gap: 12px;
+    padding: 4px 16px 14px;
+  }
+
+  .modal-foot {
+    padding: 10px 14px 12px;
+    gap: 8px;
+  }
+
+  .filter-label {
+    font-size: 13px;
+  }
+
+  .filter-hint {
+    font-size: 12px;
+  }
+
+  .filter-chip {
+    min-height: 30px;
+    padding: 3px 10px;
+    font-size: 12px;
+  }
+
+  .switch,
+  .link-btn {
+    font-size: 13px;
+  }
+
+  .modal-foot .action-btn {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* Mini-cartes (Ma progression, Entraînement) */
+  .mini-cards {
+    gap: 8px;
+  }
+
+  .mini-card {
+    min-height: 52px;
+    gap: 8px;
+    padding: 7px 8px 7px 10px;
+    border-width: 1px;
+    border-radius: 12px;
+  }
+
+  .mini-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .mini-card-emoji {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    border-radius: 9px;
+  }
+
+  .mini-card .status-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .mini-card.is-known,
+  .mini-card.is-review {
+    border-width: 1.5px;
+  }
+
+  /* Quizz et Entraînement un peu plus denses */
+  .quiz-cat {
+    padding: 14px;
+  }
+
+  .quiz-cat-title {
+    font-size: 20px;
+  }
+
+  .quiz-question {
+    font-size: 18px;
+  }
+
+  .quiz-cat-desc {
+    font-size: 13px;
+  }
+
+  .quiz-facts span {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .h2 {
+    font-size: 22px;
+  }
+
+  .panel-pad {
+    padding: 16px;
+  }
+
+  .qcm-option {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  .scenario-title {
+    font-size: 15px;
+  }
+
+  .scenario-block p,
+  .scenario-block ul {
+    font-size: 14px;
+  }
+
+  .detail-hero {
+    padding: 18px 16px 16px;
+  }
+
+  .detail-title {
+    font-size: clamp(24px, 7vw, 36px);
+  }
+
+  .detail-block {
+    padding: 14px;
+  }
+
+  .detail-block p {
+    font-size: 14.5px;
+  }
 }
 
 @media (max-width: 360px) {
@@ -247,7 +454,15 @@
   }
 
   .scenario-title {
-    font-size: 15.5px;
+    font-size: 14px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .mini-card-title {
+    font-size: 12.5px;
   }
 }
 

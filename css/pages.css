@@ -725,10 +725,7 @@
 
 /* ---------- Quizz : logo et accroche ---------- */
 
-/* Pas de bouton retour sur le Quizz : le titre remonte */
-.view-quiz .back-row {
-  margin-bottom: 10px;
-}
+/* Pas de bouton retour sur le Quizz : le titre reste sous le menu */
 
 .quiz-logo {
   margin: 0 0 12px;
