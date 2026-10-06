@@ -1,0 +1,258 @@
+/* css/responsive.css
+   Adaptations téléphone / tablette / ordinateur. Chargé en dernier. */
+
+/* ---------- Responsive ---------- */
+
+@media (min-width: 760px) {
+  .app {
+    padding-bottom: 64px;
+  }
+
+  .tiles {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+
+  .tiles-sections {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .tiles-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Ordinateur : autant de colonnes que la largeur le permet */
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    padding: 18px 18px 14px;
+  }
+
+  .card-title {
+    font-size: 19px;
+  }
+
+  .ingredient.small {
+    font-size: 12.5px;
+    padding: 4px 9px;
+  }
+
+
+  .search-box {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Fiche détaillée : les blocs se rangent côte à côte */
+  .detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .detail-hero,
+  .pager {
+    grid-column: 1 / -1;
+  }
+
+}
+
+@media (min-width: 1100px) {
+  .detail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  /* S'entraîner : 2 colonnes, la 3e tuile sur toute la largeur */
+  .tiles-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tiles-3 .tile:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .tile {
+    min-height: 132px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .tile-emoji {
+    right: -4px;
+    top: -2px;
+    font-size: 46px;
+  }
+
+  .tile-title {
+    max-width: 100%;
+  }
+
+  .tile-title {
+    font-size: 18px;
+  }
+
+  .tile-meta {
+    font-size: 12px;
+  }
+
+
+
+
+  .ring.big {
+    width: 88px;
+    height: 88px;
+  }
+
+  .ring.big .ring-inner {
+    width: 70px;
+    height: 70px;
+  }
+
+  .ring.big .ring-inner b {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .filters-btn span {
+    display: none;
+  }
+
+  .filters-btn {
+    padding: 0 14px;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .seg {
+    flex: 1;
+    padding: 4px 8px;
+  }
+
+
+
+
+}
+
+@media (max-width: 360px) {
+  .status-buttons.labeled .status-btn {
+    flex: 1;
+    gap: 6px;
+    padding: 0 10px;
+    font-size: 14px;
+  }
+
+  .card {
+    padding: 14px 11px 10px;
+  }
+
+  .card-title {
+    font-size: 16px;
+  }
+
+  .status-btn {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 339px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Accueil et Quizz sur téléphone / tablette : les scores passent sous le titre */
+@media (max-width: 759px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "logo"
+      "stats"
+      "scores";
+    gap: 6px;
+  }
+
+  .home-hero .score-rings {
+    justify-self: stretch;
+    justify-content: space-around;
+    gap: 10px;
+    margin: 18px 0 4px;
+  }
+
+  .score-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .score-ring b {
+    font-size: 18px;
+  }
+
+  .score-ring-label {
+    font-size: 19px;
+  }
+
+  .score-ring-item {
+    min-width: 0;
+  }
+
+  .score-ring.big {
+    width: 92px;
+    height: 92px;
+  }
+
+  .score-ring.big b {
+    font-size: 23px;
+  }
+
+  .quiz-general-label .score-ring-label {
+    font-size: 19px;
+  }
+}
+
+@media (max-width: 360px) {
+  .score-ring {
+    width: 62px;
+    height: 62px;
+  }
+
+  .score-ring b {
+    font-size: 16px;
+  }
+
+  .score-ring-label {
+    font-size: 16px;
+  }
+
+  .scenario-head {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .scenario-title {
+    font-size: 15.5px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mini-cards {
+    grid-template-columns: 1fr;
+  }
+}

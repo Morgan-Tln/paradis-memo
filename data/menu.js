@@ -1,5 +1,6 @@
 // Base de données complète enrichie depuis la carte PDF - Le Paradis du Fruit
-// Version v13 : données de révision alignées avec la carte PDF, quiz renforcé et allergènes non officiels côté application.
+// La carte uniquement. Les allergènes officiels sont dans data/allergens.js,
+// les questions du quizz dans data/quiz-questions.js.
 window.SECTIONS = {
   "plats": {
     "label": "🍽️ Les Plats",
@@ -259,7 +260,7 @@ window.SECTIONS = {
       },
       "street_paradis": {
         "label": "Street Paradis",
-        "emoji": "🍔",
+        "emoji": "🦞",
         "items": [
           {
             "name": "Fish & Chips",
@@ -665,7 +666,7 @@ window.SECTIONS = {
       },
       "accompagnements": {
         "label": "Vos Accompagnements",
-        "emoji": "🥙",
+        "emoji": "🥣",
         "items": [
           {
             "name": "Liste des accompagnements",
@@ -737,7 +738,7 @@ window.SECTIONS = {
       },
       "formules": {
         "label": "Formules Assiettes",
-        "emoji": "🍱",
+        "emoji": "🍛",
         "items": [
           {
             "name": "Adam & Eve",
@@ -996,7 +997,7 @@ window.SECTIONS = {
       },
       "cocktails_composer": {
         "label": "Cocktails à Composer (35cl - 45cl)",
-        "emoji": "🧪",
+        "emoji": "🥤",
         "items": [
           {
             "name": "Yoyo à composer",
@@ -1588,7 +1589,7 @@ window.SECTIONS = {
     "categories": {
       "creations": {
         "label": "Desserts Créations",
-        "emoji": "✨",
+        "emoji": "🍰",
         "items": [
           {
             "name": "Fondant Cœur Coulant",
@@ -2050,20 +2051,3 @@ window.SECTIONS = {
     }
   }
 };
-
-window.REVISION_ALLERGENS = [
-  { id: "gluten", name: "Céréales contenant du gluten", desc: "Blé, seigle, orge, avoine, épeautre (Pitas, Focaccia, Blinis, Choux, Panures)", color: { bg: "#faf6f0", text: "#6b4423", border: "#e8dcad" } },
-  { id: "crustaces", name: "Crustacés", desc: "Crevettes, homard, crabe", color: { bg: "#ffe4e6", text: "#9f1239", border: "#fecdd3" } },
-  { id: "oeufs", name: "Œufs", desc: "Œufs pochés, durs, mayonnaise maison, sauces Tartare et Caesar", color: { bg: "#fef9c3", text: "#713f12", border: "#fef08a" } },
-  { id: "poissons", name: "Poissons", desc: "Thon Listao, Saumon fumé, Merlu du Cap, Limande", color: { bg: "#e0f2fe", text: "#0369a1", border: "#bae6fd" } },
-  { id: "arachides", name: "Arachides", desc: "Huiles ou éclats d'arachides (Risque de contamination croisée)", color: { bg: "#fef3c7", text: "#92400e", border: "#fde68a" } },
-  { id: "soja", name: "Soja", desc: "Edamames frais, sauces asiatiques (Sauce Thaï, Tom Yum)", color: { bg: "#f0fdf4", text: "#166534", border: "#bbf7d0" } },
-  { id: "lait", name: "Lait (Lactose)", desc: "Cheddar, Chèvre, Mozzarella, Burrata, Feta, Cream Cheese, Crèmes, Yolita", color: { bg: "#faf5ff", text: "#581c87", border: "#e9d5ff" } },
-  { id: "fruits_coque", name: "Fruits à coque", desc: "Noix, amandes effilées, éclats de pistache de Sicile", color: { bg: "#faf6f0", text: "#7c2d12", border: "#ebdcd5" } },
-  { id: "celeri", name: "Céleri", desc: "Céleri branche, présent nativement dans la Tartinade de Thon", color: { bg: "#f0fdf4", text: "#15803d", border: "#bbf7d0" } },
-  { id: "moutarde", name: "Moutarde", desc: "Moutarde au miel, assaisonnements de toasts et vinaigrettes", color: { bg: "#fef9c3", text: "#a16207", border: "#fef08a" } },
-  { id: "sesame", name: "Graines de sésame", desc: "Graines de sésame noir/blanc, présent sur les brochettes de saumon", color: { bg: "#fbf7f5", text: "#451a03", border: "#ebdcd5" } },
-  { id: "sulfites", name: "Anhydride sulfureux & Sulfites", desc: "Conservateurs (vins, alcools, citrons confits, vinaigres)", color: { bg: "#ecfeff", text: "#0891b2", border: "#a5f3fc" } },
-  { id: "lupin", name: "Lupin", desc: "Farines spéciales ou additifs de boulangerie (Pitas, pains)", color: { bg: "#f8fafc", text: "#334155", border: "#cbd5e1" } },
-  { id: "mollusques", name: "Mollusques", desc: "Calmars, moules, escargots", color: { bg: "#e0f2fe", text: "#0369a1", border: "#bae6fd" } }
-];

@@ -1,0 +1,807 @@
+/* css/components.css
+   Composants réutilisés : tuiles, cartes, boutons, pastilles, cercles de score. */
+
+/* ---------- Tuiles (sections, familles, raccourcis) ---------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Une seule tuile pour toute l'app (sections, familles, S'entraîner) :
+   dégradé dans la couleur de la famille, grand emoji en décor. */
+.tile {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 150px;
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(140deg, var(--tile1) 0%, var(--tile2) 100%);
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 18px -14px rgba(23, 36, 29, 0.45);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px -14px rgba(23, 36, 29, 0.5);
+}
+
+.tile:active {
+  transform: scale(0.985);
+}
+
+.tile-emoji {
+  position: absolute;
+  right: -6px;
+  top: -4px;
+  z-index: -1;
+  font-size: 74px;
+  line-height: 1;
+  opacity: 0.85;
+  transform: rotate(12deg);
+}
+
+.tile-title {
+  max-width: 85%;
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100;
+  font-size: 21px;
+  font-weight: 750;
+  line-height: 1.12;
+}
+
+.tile-meta {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tile .bar {
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.tile .bar-fill {
+  background: #fff;
+}
+
+.tiles-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ---------- Cercles de score (accueil, quizz) ---------- */
+
+.score-rings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 26px;
+}
+
+.score-ring-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 78px;
+}
+
+/* Anneau en dégradé (couleur du thème), centre blanc */
+.score-ring {
+  --p: 0;
+  position: relative;
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--surface) 0 63%, transparent 64%),
+    conic-gradient(from -90deg, var(--c) 0, var(--c2) calc(var(--p) * 1%), var(--c-soft2) 0);
+  box-shadow: 0 8px 20px -14px var(--c);
+  transition: transform 0.15s ease;
+}
+
+.score-ring.big {
+  width: 112px;
+  height: 112px;
+}
+
+a.score-ring-item:hover .score-ring {
+  transform: scale(1.05);
+}
+
+.score-ring b {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--c-ink);
+}
+
+.score-ring.big b {
+  font-size: 28px;
+}
+
+/* Même police que le logo (Fraunces, très gras), en plus petit, en dégradé */
+.score-ring-label {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100, "opsz" 144;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(100deg, var(--c), var(--c2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.04em;
+}
+
+/* ---------- Cartes produit ---------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 14px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-top: 5px solid var(--c);
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.12s ease;
+}
+
+.card:active {
+  transform: scale(0.985);
+}
+
+.card-title {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.card-foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.ingredient-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ingredient {
+  overflow-wrap: anywhere;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ingredient.small {
+  padding: 3px 7px;
+  font-size: 11.5px;
+  border-radius: 6px;
+}
+
+/* Statut des cartes : contour complet + fond teinté, bien visible
+   même quand la famille est déjà verte ou rose. */
+.card.is-known {
+  background: var(--ok-soft);
+  border: 2px solid var(--ok);
+  border-top: 5px solid var(--ok);
+}
+
+.card.is-review {
+  background: var(--ko-soft);
+  border: 2px solid var(--ko);
+  border-top: 5px solid var(--ko);
+}
+
+/* ---------- Carte compacte (Ma progression, Entraînement) ---------- */
+
+.mini-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.mini-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  padding: 10px 10px 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.12s ease;
+}
+
+.mini-card:hover {
+  border-color: var(--c);
+}
+
+.mini-card:active {
+  transform: scale(0.99);
+}
+
+.mini-card-emoji {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(140deg, var(--tile1), var(--tile2));
+  font-size: 21px;
+}
+
+.mini-card-title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.mini-card .status-buttons {
+  flex: none;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.mini-card .status-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+}
+
+.mini-card.is-known {
+  background: var(--ok-soft);
+  border: 2px solid var(--ok);
+}
+
+.mini-card.is-review {
+  background: var(--ko-soft);
+  border: 2px solid var(--ko);
+}
+
+/* ---------- Boutons ✕ / ✓ ---------- */
+
+.status-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  font-size: 17px;
+  font-weight: 800;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.status-btn.ok {
+  color: var(--ok);
+  border-color: var(--ok-line);
+}
+
+.status-btn.ko {
+  color: var(--ko);
+  border-color: var(--ko-line);
+}
+
+.status-btn.ok.on {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+
+.status-btn.ko.on {
+  background: var(--ko);
+  border-color: var(--ko);
+  color: #fff;
+}
+
+.status-buttons.labeled {
+  margin-top: 16px;
+}
+
+.status-buttons.labeled .status-btn {
+  white-space: nowrap;
+  width: auto;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 15px;
+}
+
+.status-buttons.labeled .status-btn b {
+  font-weight: 700;
+}
+
+/* ---------- Allergènes ---------- */
+
+.allergens-block .info-box {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.allergens-block .info-box .box-title {
+  display: none;
+}
+
+.allergen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.allergen-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.allergen-chip.trace {
+  border-style: dashed;
+}
+
+.allergen-traces {
+  margin-top: 12px;
+}
+
+.allergen-traces-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.allergen-missing {
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+/* ---------- Panneaux, boutons et badges (Quizz, Entraînement) ---------- */
+
+.panel {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-lg);
+}
+
+.panel-pad {
+  padding: 20px;
+}
+
+.view-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.view-title .muted {
+  margin: 6px 0 0;
+  max-width: 60ch;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100;
+  font-size: 26px;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.view-entrainement {
+  --c-strong: #a5560d;
+}
+
+.quiz-card {
+  width: min(760px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  border-top: 6px solid var(--c);
+}
+
+.quiz-question {
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.answer {
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--c-soft);
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.action-btn {
+  min-height: 50px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.action-btn.primary {
+  background: var(--c);
+  border-color: var(--c);
+  color: #fff;
+}
+
+.action-btn.review {
+  background: var(--ko-soft);
+  border-color: var(--ko-line);
+  color: var(--ko);
+}
+
+.action-btn.know {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+
+.action-btn.allergen {
+  background: #fff4dc;
+  border-color: #f1d796;
+  color: #8a5a00;
+}
+
+.action-btn.neutral {
+  background: var(--bg);
+}
+
+.tag-btn {
+  min-height: 36px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge.info {
+  background: var(--c-soft2);
+  color: var(--c-strong);
+}
+
+.badge.warn {
+  background: #fff1d6;
+  color: #8a5a00;
+}
+
+.progress-line {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-soft2);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--c);
+  transition: width 0.3s ease;
+}
+
+.category {
+  margin-top: 12px;
+  overflow: hidden;
+  border-left: 6px solid var(--c);
+}
+
+.category-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.category-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.emoji-box {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--c-soft2);
+  font-size: 22px;
+  flex: none;
+}
+
+.category-name {
+  font-weight: 700;
+  font-size: 15.5px;
+  line-height: 1.3;
+}
+
+.category-meta {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.category-head .badge {
+  background: var(--c-soft);
+  color: var(--c-strong);
+}
+
+.category-body {
+  padding: 4px 16px 18px;
+}
+
+.info-box {
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+
+.info-box.memo {
+  background: #fff9e6;
+}
+
+.info-box.trap {
+  background: #fff1ea;
+}
+
+.box-title {
+  margin-bottom: 6px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.info-box.memo .box-title {
+  color: #8a6200;
+}
+
+.info-box.trap .box-title {
+  color: #b4471a;
+}
+
+.box-text {
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* ---------- Recherche et filtres ---------- */
+
+.search-row {
+  display: flex;
+  gap: 10px;
+}
+
+.search-row .search-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.search-clear {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 0 16px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.filters-btn b {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--ko);
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+}
+
+.filters-btn.open,
+.filters-btn.has {
+  border-color: var(--ink);
+}
+
+.filters-btn.open {
+  background: var(--ink);
+  color: #fff;
+}
+
+.filters-panel {
+  margin-top: 10px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  display: grid;
+  gap: 16px;
+}
+
+.filter-label {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.filter-hint {
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.filter-group .chip-row {
+  margin-top: 8px;
+}
+
+.filter-chip.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.filter-chip.allergen.active {
+  background: var(--ko);
+  border-color: var(--ko);
+}
+
+.filters-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.switch input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--leaf);
+}
+
+.link-btn {
+  min-height: 36px;
+  padding: 4px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
